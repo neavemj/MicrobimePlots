@@ -43,7 +43,7 @@ sharedsubFile = sharedsubFile[4:14839,]
 class(sharedsubFile) <- "numeric"
 ```
 
-Import taxonomy file
+Import taxonomy file from mothur
 
 ```{r}
 taxFile = read.table('micro.final.0.03.cons.taxonomy', header=T, sep='\t')
