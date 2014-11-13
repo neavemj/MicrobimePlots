@@ -68,12 +68,10 @@ metaFile = metaFile[,2:6]
 ```{r}
 OTU = otu_table(sharedFile, taxa_are_rows = TRUE)
 OTUsub = otu_table(sharedsubFile, taxa_are_rows = TRUE)
-OTUspist = otu_table(sharedFileSpist, taxa_are_rows = TRUE)
 TAX = tax_table(taxFile)
 META = sample_data(metaFile)
 physeq = phyloseq(OTU, TAX, META)
 physeqSub = phyloseq(OTUsub, TAX, META)
-spist = phyloseq(OTUspist, TAX, META)
 physeq
 ```
 
@@ -188,13 +186,54 @@ spistRedSea + facet_wrap(~reef, scales="free")
 
 Endozoicomonas are fairly abundant throughout all sites, though particularly abundant in the samples I collected last year for the metagenome / single cell study from Al Fahal Reef. The Al Fahal samples collected for this global STP study are not so dominated by Endozoicomonas.
 
+# Ordination of Stylophora pistillata samples
+
+Import NMDS and PCoA files generated in mothur and plot using ggplot
+
+```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
+mothurNMDS <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.nmds.axes", header=T))
+mothurPCOA <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.pcoa.axes", header=T))
+mothurNMDSspearman <- as.data.frame(read.table("micro.spist.0.03.spearman.corr.axes", header=T))
+rownames(mothurNMDS) <- mothurNMDS[,1] 
+rownames(mothurPCOA) <- mothurPCOA[,1]
+rownames(mothurNMDSspearman) <- mothurNMDSspearman[,1]
+
+mothurNMDSmeta <- merge(mothurNMDS, metaFile, by = "row.names")
+mothurPCOAmeta <- merge(mothurPCOA, metaFile, by = "row.names")
+
+mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+  geom_point(aes(x=axis2, y=axis3, color=site))
+mothurNMDSplot
+ggplot(mothurPCOAmeta) +
+  geom_point(aes(x=axis1, y=axis2, color=site)) 
+
+```
+
+I think the NMDS looks better - it explains more of the variation and spreads the samples better.
+
+We can also overlay this plot with the OTUs that most contributed to the sample differences (generated using the indicator command in mothur)
+
+```{r}
+
+top10indicator = mothurNMDSspearman[c("Otu000004","Otu000007","Otu000019","Otu000045","Otu000095","Otu000384","Otu000502","Otu000035","Otu000032","Otu000015","Otu000142"),]
+arrowmatrix = top10indicator
+arrowdf <- data.frame(labels = rownames(arrowmatrix), arrowmatrix)
+
+# get taxonomic information from the original tax file
+taxFile[rownames(arrowmatrix),"Genus"]
+arrowdf <- data.frame(labels = taxFile[rownames(arrowmatrix),"Genus"], arrowmatrix)
+
+arrowmap <- aes(xend =axis1, yend = axis2, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
+labelmap <- aes(x = axis1, y = axis2 + 0.06, shape = NULL, color = NULL, label = labels, size=2)
+arrowhead = arrow(length = unit(0.02, "npc"))
+mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead) + geom_text(labelmap, size = 4, data = arrowdf)
+mothurNMDSplotArrow 
+
+```
 
 
-
-
-
-
-# Relative abundance of pocillopora verrucosa otus bar plot
+# Relative abundance of Pocillopora verrucosa otus bar plot
 
 ```{r, fig.width = 10}
 microSubRelFiltPverrFilt = filter_taxa(microSubRelFiltPverr, function(x) mean(x) > 1e-2, TRUE)
@@ -223,6 +262,7 @@ seaBar + facet_wrap(~site, scales="free")
 ```
 
 Mostly dominated by Synechococccus and other typical seawater bacteria. Note the difference for Ningaloo - these were the samples that got warm! Seems this caused the community to change toward Alteromonas / Vibrio. 
+
 
 
 
