@@ -1,0 +1,31 @@
+---
+title: "Global STP Analysis - S. pistillata"
+author: "Matt"
+date: "November 16, 2014"
+output: html_document
+---
+
+### Load required libraries
+
+```{r setup}
+library("phyloseq")
+library("ggplot2")
+library("plyr")
+library("vegan")
+library("grid")
+library("directlabels")
+library("knitr")
+opts_knit$set(root.dir = "~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/")
+```
+
+# Relative abundance of seawater otus bar plot
+
+```{r, fig.width = 10}
+microSubRelFiltSeaFilt = filter_taxa(microSubRelFiltSea, function(x) mean(x) > 5e-3, TRUE)
+seaBar <- plot_bar(microSubRelFiltSeaFilt, fill="Genus")
+seaBar + facet_wrap(~site, scales="free")
+```
+
+Mostly dominated by Synechococccus and other typical seawater bacteria. Note the difference for Ningaloo - these were the samples that got warm! Seems this caused the community to change toward Alteromonas / Vibrio. 
+
+

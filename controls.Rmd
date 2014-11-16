@@ -18,7 +18,7 @@ library("directlabels")
 
 ### Import data into R studio
 
-First .shared 'otu matrix' from mothur
+Import .shared 'otu matrix' from mothur
 
 ```{r}
 setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
@@ -87,7 +87,6 @@ Split into species
 
 ```{r}
 microSubRelFiltSpist <- prune_samples(c("11","49-2","50-2","51-2","52-2","53-2","54-2","57-2","63-2","64-2","65-2","67-2","80-2","75-2","76-2","77-2","101","102","103","105","173","174","175","176","205","206","207","208","209","226","227","228","229","230","231","235","236","237","241","242","243","244","251","253","254","256","257","258","259","260","261","262","MIC-25","MIC-50","MIC-53","MIC-91","MIC-145","MIC-151","MIC-220","MIC-226","MIC-229","MIC-424","MIC-427","MIC-453","RS1","RS2","RS3","RS5","RS6","RS7","RS10","RS12","RS13","RS15","RS16","RS17","RS18","19-rep2","55-2-rep2","56-2-rep2","104-rep2","MIC-85-rep2"), microSubRelFilt)
-
 microSubRelFiltPdami <- subset_samples(microSubRelFilt, species=='Pocillopora damicornis')
 microSubRelFiltPverr <- subset_samples(microSubRelFilt, species=='Pocillopora verrucosa')
 microSubRelFiltSea <- subset_samples(microSubRelFilt, species=='seawater')
@@ -110,7 +109,7 @@ microCoralRich = plot_richness(physeqCoral, x = 'species', measures = c('Chao1',
 microCoralRich
 ```
 
-The predicted number of OTUs and diversity indecies look similar across the different coral types. I'll add some whisker plots to make this easier to see. 
+The predicted number of OTUs and diversity indecies look similar across the different coral species. I'll add some whisker plots to make this easier to see. 
 
 ```{r, fig.width = 8}
 microCoralRich + geom_boxplot(data = microCoralRich$data, aes(x = species, y = value, color = NULL), alpha = 0.1)
@@ -118,7 +117,7 @@ microCoralRich + geom_boxplot(data = microCoralRich$data, aes(x = species, y = v
 
 # Negative controls
 
-The 30 and 35 cycle negative controls had very few sequences that were removed as poor quality by mothur. The 40 cycle negative control still had a few sequences remaining - I'll do a bar graph of these results. 
+The 30 and 35 cycle negative controls had very few sequences and were removed as poor quality by mothur. The 40 cycle negative control still had a few sequences remaining - I'll do a bar graph of these results. 
 
 ```{r, fig.width = 4}
 neg = prune_samples(c("40-cycles"), physeq)
@@ -149,37 +148,196 @@ plot_bar(ningalooSamplesFilt, fill="Genus", title='Ningaloo Samples')
 
 The sample numbers with -2 at the end are the PFA preserved samples, the others are the warmed samples. These look quite different; I'd say the PFA preserved are the more accurate as they contain Endozoicomonas and look more normal to me. The warmed samples have more Vibrios and unknown stuff. Decided to remove the warmed samples from the dataset and keep the PFA preserved ones but we should think more about this. 
 
+# Mock communities
 
+Make data frame for ggplot, then plot rarefaction of mock community OTUs. Red dotted line indicates expected number of OTUs. 
 
-# Relative abundance of Pocillopora verrucosa otus bar plot
+```{r, fig.width = 8, warning=FALSE}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
+rareEvenPool1 <- read.delim("micro.final.mockEvenPool1.rarefaction", header=T)
+colnames(rareEvenPool1) <- c("numsampled", "evP1")
+rareStaggeredPool1 <- read.table("micro.final.mockStaggeredPool1.rarefaction", header=T)
+colnames(rareStaggeredPool1) <- c("numsampled", "stgP1")
+rareEvenPool2 <- read.table("micro.final.mockEvenPool2.rarefaction", header=T)
+colnames(rareEvenPool2) <- c("numsampled", "evP2")
+rareStaggeredPool2 <- read.table("micro.final.mockStaggeredPool2.rarefaction", header=T)
+colnames(rareStaggeredPool2) <- c("numsampled", "stgP2")
 
-```{r, fig.width = 10}
-microSubRelFiltPverrFilt = filter_taxa(microSubRelFiltPverr, function(x) mean(x) > 1e-2, TRUE)
-pverrBar <- plot_bar(microSubRelFiltPverrFilt, fill="Genus", title='Pocillopora verrucosa')
-pverrBar + facet_wrap(~site, scales="free")
+tmp <- merge(rareEvenPool1, rareStaggeredPool1, by="numsampled")
+tmp2 <- merge(tmp, rareEvenPool2, by='numsampled')
+mockDF <- merge(tmp2, rareStaggeredPool2, by='numsampled')
+
+rareMockPlot <- ggplot(data=mockDF) + 
+  geom_line(aes(x=numsampled, y=evP1, color='even pool1')) +
+  geom_line(aes(x=numsampled, y=stgP1, color='staggered pool1')) +
+  geom_line(aes(x=numsampled, y=evP2, color='even pool2')) +
+  geom_line(aes(x=numsampled, y=stgP2, color='staggered pool2')) +
+  theme(legend.title=element_blank()) +
+  xlab('sequences') +
+  ylab('OTUs')
+
+rareMockPlot + geom_hline(aes(yintercept=21), colour="#990000", linetype="dashed")
 ```
 
-Lots of Endozoicomonas - maybe even more abundant than in our Stylophora pistillata samples. 
+Interesting result - we can see that more sequencing results in more spurious OTUs. They appear to just keep accumulating.
 
-# Relative abundance of pocillopora damicornis otus bar plot
+# Barplots of the mock community compositions
 
-```{r, fig.width = 10}
-microSubRelFiltPdamiFilt = filter_taxa(microSubRelFiltPdami, function(x) mean(x) > 1e-2, TRUE)
-pdamiBar <- plot_bar(microSubRelFiltPdamiFilt, fill="Genus", title='Pocillopora damicornis')
-pdamiBar + facet_wrap(~site, scales="free")
+First the even mock community from pool1. Red dotted line is the expected abundance of each of the taxa. 
+
+```{r, fig.width = 8}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
+evP1shared = read.table('micro.final.mockEvenPool1.shared')
+evP1shared = t(evP1shared)
+rownames(evP1shared) = evP1shared[,1]
+colnames(evP1shared) = evP1shared[2,]
+evP1shared = evP1shared[,2]
+evP1shared = as.matrix(evP1shared[4:32])
+class(evP1shared) <- "numeric"
+
+evP1tax = read.table('micro.mockEvenPool1.unique_list.0.03.cons.taxonomy', header=T, sep='\t')
+rownames(evP1tax) = evP1tax[,1]
+evP1tax= evP1tax[,3:9]
+evP1tax = as.matrix(evP1tax)
+
+colnames(evP1shared) <- c('abund')
+evP1 <- merge(evP1shared, evP1tax, by="row.names")
+
+evP1$relAbund = evP1$abund / sum(evP1$abund)
+evP1$otuNumber <- rownames(evP1)
+evP1$otuNumber <- factor(evP1$otuNumber, levels=evP1$otuNumber, ordered=TRUE)
+
+barMockPlot <- ggplot(data=evP1) + 
+  geom_bar(aes(x=otuNumber, y=relAbund, fill=Genus), stat="identity") +
+  theme(axis.text.x=element_text(angle=90)) +
+  geom_hline(aes(yintercept=.047), colour="#990000", linetype="dashed")
+barMockPlot
 ```
 
-Interestingly, these P.damicornis samples have less Endozoicomonas than the closely related P.verrucosa. 
+There are 21 OTUs expected from this mock community, so a couple are missing. It seems as though the large pink bar (Staphylococcus) actually contains 2 Staphylococcus OTUs, which accounts for one of the missing members. The other 2 missing are a Methanobrevibacter and a Propionibacterium - apparently these are not amplified with our primers. 
 
-# Relative abundance of seawater otus bar plot
+The very small bars to the right must be the spurious OTUs generated from errors that were coming up in the rarefaction curves. 
 
-```{r, fig.width = 10}
-microSubRelFiltSeaFilt = filter_taxa(microSubRelFiltSea, function(x) mean(x) > 5e-3, TRUE)
-seaBar <- plot_bar(microSubRelFiltSeaFilt, fill="Genus")
-seaBar + facet_wrap(~site, scales="free")
+ggplot bar plot for even pool 2
+
+```{r, fig.width = 8}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
+evP2shared = read.table('micro.final.mockEvenPool2.shared')
+evP2shared = t(evP2shared)
+rownames(evP2shared) = evP2shared[,1]
+colnames(evP2shared) = evP2shared[2,]
+evP2shared = evP2shared[,2]
+evP2shared = as.matrix(evP2shared[4:32])
+class(evP2shared) <- "numeric"
+
+evP2tax = read.table('micro.mockEvenPool2.unique_list.0.03.cons.taxonomy', header=T, sep='\t')
+rownames(evP2tax) = evP2tax[,1]
+evP2tax= evP2tax[,3:9]
+evP2tax = as.matrix(evP2tax)
+colnames(evP2shared) <- c('abund')
+evP2 <- merge(evP2shared, evP2tax, by="row.names")
+
+evP2$relAbund = evP2$abund / sum(evP2$abund)
+evP2$otuNumber <- rownames(evP2)
+evP2$otuNumber <- factor(evP2$otuNumber, levels=evP2$otuNumber, ordered=TRUE)
+
+barMockPlot <- ggplot(data=evP2) + 
+  geom_bar(aes(x=otuNumber, y=relAbund, fill=Genus), stat="identity") +
+  theme(axis.text.x=element_text(angle=90)) +
+  geom_hline(aes(yintercept=.047), colour="#990000", linetype="dashed")
+barMockPlot
 ```
 
-Mostly dominated by Synechococccus and other typical seawater bacteria. Note the difference for Ningaloo - these were the samples that got warm! Seems this caused the community to change toward Alteromonas / Vibrio. 
+Similar result to last time. The Staphylococcus bar contains 2 OTUs and neither Methanobrevibacter or Propionibacterium have been amplified. 
+
+# Staggered mock communities
+
+Calculate relative abundance of the staggered mock communities and overlay this data with what was expected. 
+
+```{r, fig.width = 8, fig.height = 6}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
+stgP1shared = read.table('micro.final.mockStaggeredPool1.shared')
+stgP1shared = t(stgP1shared)
+rownames(stgP1shared) = stgP1shared[,1]
+colnames(stgP1shared) = stgP1shared[2,]
+stgP1shared = stgP1shared[,2]
+stgP1shared = as.matrix(stgP1shared[4:32])
+class(stgP1shared) <- "numeric"
+
+stgP1tax = read.table('micro.mockStaggeredPool1.unique_list.0.03.cons.taxonomy', header=T, sep='\t')
+rownames(stgP1tax) = stgP1tax[,1]
+stgP1tax= stgP1tax[,3:9]
+stgP1tax = as.matrix(stgP1tax)
+colnames(stgP1shared) <- c('abund')
+stgP1 <- merge(stgP1shared, stgP1tax, by="row.names")
+
+stgP1$relAbund = stgP1$abund / sum(stgP1$abund)
+stgP1$otuNumber <- rownames(stgP1)
+stgP1$otuNumber <- factor(stgP1$otuNumber, levels=stgP1$otuNumber, ordered=TRUE)
+stgP1$type <- rep('observed', 29)
+
+# add expected stagger
+
+hmpStaggered = read.table('HMP_staggeredEdit.txt', sep='\t', header=T)
+hmpStaggered$ExpRelAbund = hmpStaggered$expAbund / sum(hmpStaggered$expAbund)
+hmpStaggered$type = rep("expected", 21)
+hmpStaggered$otu <- rownames(hmpStaggered)
+hmpStaggered$otu <- factor(hmpStaggered$otu, levels=hmpStaggered$otu, ordered=TRUE)
+
+barMockPlot <- ggplot(data=stgP1) + 
+  geom_bar(aes(x=Genus, y=relAbund), stat="identity", fill='#66CC99') +
+  geom_point(data=hmpStaggered, aes(x=Genus, y=ExpRelAbund, color='expected'), stat='identity') +
+  scale_color_manual(values=c("expected"="blue")) +
+  theme(axis.text.x=element_text(angle=90), legend.title=element_blank()) +
+  ggtitle('Staggered Mock Pool1')
+barMockPlot
+```
+
+These are pretty good. The blue dots (expected) generally follow the obtained abundance - eg. Acinetobacter is low and the blue dot is low, Escherichia-Shigella is high and the blue dot is high. Some genera have more than 1 blue dot (Staphylococcus / Strep), which is because more than one species of these genera were included. In these cases, the height of the blue dots can be combined and compared to the green - again pretty good agreement. The Rhodobacter OTU has been significantly over-amplified. Note that again Methanobrevibacter / Propioibacterium are not seen despite Methanos being a big contributor to this staggered community. 
+
+ggplot bar plot for staggered pool2
+
+```{r, fig.width = 8, fig.height = 6}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
+stgP2shared = read.table('micro.final.mockStaggeredPool2.shared')
+stgP2shared = t(stgP2shared)
+rownames(stgP2shared) = stgP2shared[,1]
+colnames(stgP2shared) = stgP2shared[2,]
+stgP2shared = stgP2shared[,2]
+stgP2shared = as.matrix(stgP2shared[4:32])
+class(stgP2shared) <- "numeric"
+
+stgP2tax = read.table('micro.mockStaggeredPool2.unique_list.0.03.cons.taxonomy', header=T, sep='\t')
+rownames(stgP2tax) = stgP2tax[,1]
+stgP2tax= stgP2tax[,3:9]
+stgP2tax = as.matrix(stgP2tax)
+colnames(stgP2shared) <- c('abund')
+stgP2 <- merge(stgP2shared, stgP2tax, by="row.names")
+
+stgP2$relAbund = stgP2$abund / sum(stgP2$abund)
+stgP2$otuNumber <- rownames(stgP2)
+stgP2$otuNumber <- factor(stgP2$otuNumber, levels=stgP2$otuNumber, ordered=TRUE)
+stgP2$type <- rep('observed', 29)
+
+# add expected stagger
+
+hmpStaggered = read.table('HMP_staggeredEdit.txt', sep='\t', header=T)
+hmpStaggered$ExpRelAbund = hmpStaggered$expAbund / sum(hmpStaggered$expAbund)
+hmpStaggered$type = rep("expected", 21)
+hmpStaggered$otu <- rownames(hmpStaggered)
+hmpStaggered$otu <- factor(hmpStaggered$otu, levels=hmpStaggered$otu, ordered=TRUE)
+
+barMockPlot <- ggplot(data=stgP2) + 
+  geom_bar(aes(x=Genus, y=relAbund), stat="identity", fill='#66CC99') +
+  geom_point(data=hmpStaggered, aes(x=Genus, y=ExpRelAbund, color='expected'), stat='identity') +
+  scale_color_manual(values=c("expected"="blue")) +
+  theme(axis.text.x=element_text(angle=90), legend.title=element_blank()) +
+  ggtitle('Staggered Mock Pool2')
+barMockPlot
+```
+
+Very similar result to the other staggered community
+
 
 
 

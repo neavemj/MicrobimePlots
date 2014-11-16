@@ -17,3 +17,14 @@ library("directlabels")
 library("knitr")
 opts_knit$set(root.dir = "~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/")
 ```
+
+# Relative abundance of pocillopora damicornis otus bar plot
+
+```{r, fig.width = 10}
+microSubRelFiltPdamiFilt = filter_taxa(microSubRelFiltPdami, function(x) mean(x) > 1e-2, TRUE)
+pdamiBar <- plot_bar(microSubRelFiltPdamiFilt, fill="Genus", title='Pocillopora damicornis')
+pdamiBar + facet_wrap(~site, scales="free")
+```
+
+Interestingly, these P.damicornis samples have less Endozoicomonas than the closely related P.verrucosa. 
+

@@ -17,3 +17,14 @@ library("directlabels")
 library("knitr")
 opts_knit$set(root.dir = "~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/")
 ```
+
+# Relative abundance of Pocillopora verrucosa otus bar plot
+
+```{r, fig.width = 10}
+microSubRelFiltPverrFilt = filter_taxa(microSubRelFiltPverr, function(x) mean(x) > 1e-2, TRUE)
+pverrBar <- plot_bar(microSubRelFiltPverrFilt, fill="Genus", title='Pocillopora verrucosa')
+pverrBar + facet_wrap(~site, scales="free")
+```
+
+Lots of Endozoicomonas - maybe even more abundant than in our Stylophora pistillata samples. 
+

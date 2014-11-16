@@ -81,6 +81,16 @@ microSubRel = transform_sample_counts(microSub, function(x) x / sum(x) )
 microSubRelFilt = filter_taxa(microSubRel, function(x) mean(x) > 1e-5, TRUE)
 ```
 
+# S. pistillata from aquaria - NOTE: have to do this on non-subsampled data as these get removed in this step
+
+```{r}
+spistAq = prune_samples(c("SPaq", "SPaq-rep2"), physeq)
+spistAqrelAbundFilt = filter_taxa(spistAqrelAbund, function(x) mean(x) > 1e-2, TRUE)
+plot_bar(spistAqrelAbundFilt, fill="Genus")
+```
+
+Still about 1/4 of the bacteria are Endozoicomonas
+
 Split into the S.pistillata samples, excluding replicates and the warmed ningaloo samples
 
 ```{r}
