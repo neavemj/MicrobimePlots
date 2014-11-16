@@ -1,0 +1,268 @@
+---
+title: "Global STP Analysis - controls"
+author: "Matt"
+date: "November 12, 2014"
+output: html_document
+---
+
+### Load required libraries
+
+```{r}
+library("phyloseq")
+library("ggplot2")
+library("plyr")
+library("vegan")
+library("grid")
+library("directlabels")
+```
+
+### Import data into R studio
+
+First .shared 'otu matrix' from mothur
+
+```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
+sharedFile = read.table('micro.final.shared')
+sharedFile = t(sharedFile)
+rownames(sharedFile) = sharedFile[,1]
+colnames(sharedFile) = sharedFile[2,]
+sharedFile = sharedFile[,2:234]
+sharedFile = sharedFile[4:37368,]
+class(sharedFile) <- "numeric"
+```
+
+Import subsampled otu matrix (7779 seqs)
+
+```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
+sharedsubFile = read.table('micro.final.clean.0.03.subsample.shared')
+sharedsubFile = t(sharedsubFile)
+rownames(sharedsubFile) = sharedsubFile[,1]
+colnames(sharedsubFile) = sharedsubFile[2,]
+sharedsubFile = sharedsubFile[,2:219]
+sharedsubFile = sharedsubFile[4:14839,]
+class(sharedsubFile) <- "numeric"
+```
+
+Import taxonomy file from mothur
+
+```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
+taxFile = read.table('micro.final.0.03.cons.taxonomy', header=T, sep='\t')
+rownames(taxFile) = taxFile[,1]
+taxFile = taxFile[,3:9]
+taxFile = as.matrix(taxFile)
+```
+
+Import metadata - ie. site, type, etc..
+
+```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
+metaFile = read.table('pools.metaData2', header=T, sep='\t')
+rownames(metaFile) = metaFile[,1]
+metaFile = metaFile[,2:6]
+```
+
+### Create phyloseq object
+
+```{r}
+OTU = otu_table(sharedFile, taxa_are_rows = TRUE)
+OTUsub = otu_table(sharedsubFile, taxa_are_rows = TRUE)
+TAX = tax_table(taxFile)
+META = sample_data(metaFile)
+physeq = phyloseq(OTU, TAX, META)
+physeqSub = phyloseq(OTUsub, TAX, META)
+physeq
+```
+
+Get rid of any OTUs not present in any samples and get relative abundance
+
+```{r}
+microSub <- prune_taxa(taxa_sums(physeqSub) > 0, physeqSub)
+microSubRel = transform_sample_counts(microSub, function(x) x / sum(x) )
+microSubRelFilt = filter_taxa(microSubRel, function(x) mean(x) > 1e-5, TRUE)
+```
+
+Split into species 
+
+```{r}
+microSubRelFiltSpist <- prune_samples(c("11","49-2","50-2","51-2","52-2","53-2","54-2","57-2","63-2","64-2","65-2","67-2","80-2","75-2","76-2","77-2","101","102","103","105","173","174","175","176","205","206","207","208","209","226","227","228","229","230","231","235","236","237","241","242","243","244","251","253","254","256","257","258","259","260","261","262","MIC-25","MIC-50","MIC-53","MIC-91","MIC-145","MIC-151","MIC-220","MIC-226","MIC-229","MIC-424","MIC-427","MIC-453","RS1","RS2","RS3","RS5","RS6","RS7","RS10","RS12","RS13","RS15","RS16","RS17","RS18","19-rep2","55-2-rep2","56-2-rep2","104-rep2","MIC-85-rep2"), microSubRelFilt)
+
+microSubRelFiltPdami <- subset_samples(microSubRelFilt, species=='Pocillopora damicornis')
+microSubRelFiltPverr <- subset_samples(microSubRelFilt, species=='Pocillopora verrucosa')
+microSubRelFiltSea <- subset_samples(microSubRelFilt, species=='seawater')
+```
+
+### Richness / diversity plots on full dataset
+
+Look at observed OTUs, predicted OTUs (chao1) and then the shannon diversity index.
+
+```{r, fig.width = 8}
+microRich = plot_richness(physeq, x = 'species', measures = c('Chao1', 'Shannon', 'observed'), color = 'site')
+microRich
+```
+
+Seawater is quite a bit higher and makes the coral results a bit hard to see - drop seawater and repeat
+
+```{r, fig.width = 8}
+physeqCoral <- subset_samples(physeq, species!="seawater")
+microCoralRich = plot_richness(physeqCoral, x = 'species', measures = c('Chao1', 'Shannon', 'observed'), color = 'site')
+microCoralRich
+```
+
+The predicted number of OTUs and diversity indecies look similar across the different coral types. I'll add some whisker plots to make this easier to see. 
+
+```{r, fig.width = 8}
+microCoralRich + geom_boxplot(data = microCoralRich$data, aes(x = species, y = value, color = NULL), alpha = 0.1)
+```
+
+# Negative controls
+
+The 30 and 35 cycle negative controls had very few sequences that were removed as poor quality by mothur. The 40 cycle negative control still had a few sequences remaining - I'll do a bar graph of these results. 
+
+```{r, fig.width = 4}
+neg = prune_samples(c("40-cycles"), physeq)
+negrelAbund = transform_sample_counts(neg, function(x) x / sum(x) )
+negrelAbundFilt = filter_taxa(negrelAbund, function(x) mean(x) > 1e-2, TRUE)
+plot_bar(negrelAbundFilt, fill="Genus", title='Negative control')
+```
+
+Mostly human/lab type contaminants here; Staphylococcus is particularly abundant in the control. Decided to remove these specific OTUs from my entire dataset, which removed approximately 0.5% of the sequences. Most of the negative control OTUs were completely absent from the other samples, or at a very low abundance. Only one sample (249, Al Fahal, Red Sea, P.verrucosa), had a high abundance of the Staphyloccoccus OTU (33329 / 72680 * 100 =~ 46%). 
+
+# Compare samples that were replicated in the other MiSeq run
+
+```{r}
+replicatedSamples = prune_samples(c('RP7-rep2', 'RP8-rep2', 'RS5-rep2', 'END74-rep2', 'END59-rep2', 'END62-rep2', '55-2-rep2', '56-2-rep2', '103-rep2', '105-rep2', '250-rep2', '253-rep2', '254-rep2', 'MIC-53-rep2', 'MIC-85-rep2', 'RP7', 'RP8', 'RS5', 'END74', 'END59', 'END62', '55-2', '56-2', '103', '105', '250', '253', '254', 'MIC-53', 'MIC-85'), microSubRelFilt)
+replicatedSamplesFilt = filter_taxa(replicatedSamples, function(x) mean(x) > 4e-3, TRUE)
+plot_bar(replicatedSamplesFilt, fill="Genus", title='Replicated Samples')
+```
+
+Replicates agree reasonably well with each other. An exception might be samples 55 and 56 which look a bit different in their replicates. Decided to remove the replicates in subsequent analyses; chose the replicate with the higher number of reads.  
+
+# Compare Ningaloo samples that were warmed v. PFA preserved
+
+```{r}
+ningalooSamples = prune_samples(c('50', '50-2', '52', '52-2', '53', '53-2'), microSubRelFilt)
+ningalooSamplesFilt = filter_taxa(ningalooSamples, function(x) mean(x) > 3e-3, TRUE)
+plot_bar(ningalooSamplesFilt, fill="Genus", title='Ningaloo Samples')
+```
+
+The sample numbers with -2 at the end are the PFA preserved samples, the others are the warmed samples. These look quite different; I'd say the PFA preserved are the more accurate as they contain Endozoicomonas and look more normal to me. The warmed samples have more Vibrios and unknown stuff. Decided to remove the warmed samples from the dataset and keep the PFA preserved ones but we should think more about this. 
+
+# Relative abundance of otus in all Stylophora pistillata samples
+
+```{r, fig.width = 10}
+microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
+spistBar <- plot_bar(microSubRelFiltSpistFilt, fill="Genus", title='Stylophora pistillata')
+spistBar
+```
+
+Some variability between the samples but plenty of Endozoicomonas. I'll facet out the sites to take a closer look. 
+
+```{r, fig.width= 10}
+microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
+spistBar <- plot_bar(microSubRelFiltSpistFilt, fill="Genus", title='Stylophora pistillata')
+spistBar + facet_wrap(~site, scales='free')
+```
+
+Quite some variability in the microbial componsition across the sites. Can see Endozoicomonas throughout the graph, though it's a little difficult to see. I'll redo the graph with just endozoicomonas OTUs.
+
+```{r, fig.width = 10}
+microSubRelFiltSpistEndo = subset_taxa(microSubRelFiltSpist, Genus=='Endozoicomonas(100)')
+spistBarEndo <- plot_bar(microSubRelFiltSpistEndo, fill="Genus", title='Stylophora pistillata')
+spistBarEndo + facet_wrap(~site, scales='free')
+```
+
+Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites. Note the y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
+
+The Red Sea has the most samples and is a bit hard to see at this scale - I'll take a closer look at these reefs.
+
+```{r, fig.width= 10, fig.height = 8}
+microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
+microSubRelFiltSpistFiltRedSea <- subset_samples(microSubRelFiltSpistFilt, site=="RedSea")
+spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, fill="Genus", title='Stylophora pistillata in the Red Sea')
+spistRedSea + facet_wrap(~reef, scales="free")
+```
+
+Endozoicomonas are fairly abundant throughout all sites, though particularly abundant in the samples I collected last year for the metagenome / single cell study from Al Fahal Reef. The Al Fahal samples collected for this global STP study are not so dominated by Endozoicomonas.
+
+# Ordination of Stylophora pistillata samples
+
+Import NMDS and PCoA files generated in mothur and plot using ggplot
+
+```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
+mothurNMDS <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.nmds.axes", header=T))
+mothurPCOA <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.pcoa.axes", header=T))
+mothurNMDSspearman <- as.data.frame(read.table("micro.spist.0.03.spearman.corr.axes", header=T))
+rownames(mothurNMDS) <- mothurNMDS[,1] 
+rownames(mothurPCOA) <- mothurPCOA[,1]
+rownames(mothurNMDSspearman) <- mothurNMDSspearman[,1]
+
+mothurNMDSmeta <- merge(mothurNMDS, metaFile, by = "row.names")
+mothurPCOAmeta <- merge(mothurPCOA, metaFile, by = "row.names")
+
+mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+  geom_point(aes(x=axis2, y=axis3, color=site))
+mothurNMDSplot
+ggplot(mothurPCOAmeta) +
+  geom_point(aes(x=axis1, y=axis2, color=site)) 
+
+```
+
+I think the NMDS looks better - it explains more of the variation and spreads the samples better.
+
+We can also overlay this plot with the OTUs that most contributed to the sample differences (generated using the indicator command in mothur)
+
+```{r}
+
+top10indicator = mothurNMDSspearman[c("Otu000004","Otu000007","Otu000019","Otu000045","Otu000095","Otu000384","Otu000502","Otu000035","Otu000032","Otu000015","Otu000142"),]
+arrowmatrix = top10indicator
+arrowdf <- data.frame(labels = rownames(arrowmatrix), arrowmatrix)
+
+# get taxonomic information from the original tax file
+taxFile[rownames(arrowmatrix),"Genus"]
+arrowdf <- data.frame(labels = taxFile[rownames(arrowmatrix),"Genus"], arrowmatrix)
+
+arrowmap <- aes(xend =axis1, yend = axis2, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
+labelmap <- aes(x = axis1, y = axis2 + 0.06, shape = NULL, color = NULL, label = labels, size=2)
+arrowhead = arrow(length = unit(0.02, "npc"))
+mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead) + geom_text(labelmap, size = 4, data = arrowdf)
+mothurNMDSplotArrow 
+
+```
+
+
+# Relative abundance of Pocillopora verrucosa otus bar plot
+
+```{r, fig.width = 10}
+microSubRelFiltPverrFilt = filter_taxa(microSubRelFiltPverr, function(x) mean(x) > 1e-2, TRUE)
+pverrBar <- plot_bar(microSubRelFiltPverrFilt, fill="Genus", title='Pocillopora verrucosa')
+pverrBar + facet_wrap(~site, scales="free")
+```
+
+Lots of Endozoicomonas - maybe even more abundant than in our Stylophora pistillata samples. 
+
+# Relative abundance of pocillopora damicornis otus bar plot
+
+```{r, fig.width = 10}
+microSubRelFiltPdamiFilt = filter_taxa(microSubRelFiltPdami, function(x) mean(x) > 1e-2, TRUE)
+pdamiBar <- plot_bar(microSubRelFiltPdamiFilt, fill="Genus", title='Pocillopora damicornis')
+pdamiBar + facet_wrap(~site, scales="free")
+```
+
+Interestingly, these P.damicornis samples have less Endozoicomonas than the closely related P.verrucosa. 
+
+# Relative abundance of seawater otus bar plot
+
+```{r, fig.width = 10}
+microSubRelFiltSeaFilt = filter_taxa(microSubRelFiltSea, function(x) mean(x) > 5e-3, TRUE)
+seaBar <- plot_bar(microSubRelFiltSeaFilt, fill="Genus")
+seaBar + facet_wrap(~site, scales="free")
+```
+
+Mostly dominated by Synechococccus and other typical seawater bacteria. Note the difference for Ningaloo - these were the samples that got warm! Seems this caused the community to change toward Alteromonas / Vibrio. 
+
+
+
+
