@@ -1,5 +1,5 @@
 ---
-title: "Global STP Analysis - S. pistillata"
+title: "Global STP Analysis - Stylophora pistillata"
 author: "Matt"
 date: "November 16, 2014"
 output: html_document
@@ -75,23 +75,27 @@ physeq
 
 Get rid of any OTUs not present in any samples and get relative abundance
 
-```{r}
+```{r, fig.width = 4}
 microSub <- prune_taxa(taxa_sums(physeqSub) > 0, physeqSub)
 microSubRel = transform_sample_counts(microSub, function(x) x / sum(x) )
 microSubRelFilt = filter_taxa(microSubRel, function(x) mean(x) > 1e-5, TRUE)
 ```
 
-# S. pistillata from aquaria - NOTE: have to do this on non-subsampled data as these get removed in this step
+# Stylophora pistillata from aquaria
+
+Take a look at the bacteria classified to genus and to family. NOTE: have to do this on non-subsampled data as these get removed in this step because of low sequence number (~3000)
 
 ```{r}
 spistAq = prune_samples(c("SPaq", "SPaq-rep2"), physeq)
+spistAqrelAbund = transform_sample_counts(spistAq, function(x) x / sum(x) )
 spistAqrelAbundFilt = filter_taxa(spistAqrelAbund, function(x) mean(x) > 1e-2, TRUE)
 plot_bar(spistAqrelAbundFilt, fill="Genus")
+plot_bar(spistAqrelAbundFilt, fill="Family")
 ```
 
-Still about 1/4 of the bacteria are Endozoicomonas
+Pretty cool! Still about 1/4 of the bacteria are Endozoicomonas
 
-Split into the S.pistillata samples, excluding replicates and the warmed ningaloo samples
+Ok let's split the dataset into the S.pistillata samples, excluding replicates and the warmed ningaloo samples
 
 ```{r}
 microSubRelFiltSpist <- prune_samples(c("11","49-2","50-2","51-2","52-2","53-2","54-2","57-2","63-2","64-2","65-2","67-2","80-2","75-2","76-2","77-2","101","102","103","105","173","174","175","176","205","206","207","208","209","226","227","228","229","230","231","235","236","237","241","242","243","244","251","253","254","256","257","258","259","260","261","262","MIC-25","MIC-50","MIC-53","MIC-91","MIC-145","MIC-151","MIC-220","MIC-226","MIC-229","MIC-424","MIC-427","MIC-453","RS1","RS2","RS3","RS5","RS6","RS7","RS10","RS12","RS13","RS15","RS16","RS17","RS18","19-rep2","55-2-rep2","56-2-rep2","104-rep2","MIC-85-rep2"), microSubRelFilt)
@@ -107,7 +111,7 @@ spistBar
 
 Some variability between the samples but plenty of Endozoicomonas. I'll facet out the sites to take a closer look. 
 
-```{r, fig.width= 10}
+```{r, fig.width= 10, fig.height = 6}
 microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
 spistBar <- plot_bar(microSubRelFiltSpistFilt, fill="Genus", title='Stylophora pistillata')
 spistBar + facet_wrap(~site, scales='free')
@@ -115,13 +119,13 @@ spistBar + facet_wrap(~site, scales='free')
 
 Quite some variability in the microbial componsition across the sites. Can see Endozoicomonas throughout the graph, though it's a little difficult to see. I'll redo the graph with just endozoicomonas OTUs.
 
-```{r, fig.width = 10}
+```{r, fig.width = 10, fig.height = 6}
 microSubRelFiltSpistEndo = subset_taxa(microSubRelFiltSpist, Genus=='Endozoicomonas(100)')
 spistBarEndo <- plot_bar(microSubRelFiltSpistEndo, fill="Genus", title='Stylophora pistillata')
 spistBarEndo + facet_wrap(~site, scales='free')
 ```
 
-Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites. Note the y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
+Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites. Note the change in y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
 
 The Red Sea has the most samples and is a bit hard to see at this scale - I'll take a closer look at these reefs.
 
