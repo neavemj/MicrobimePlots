@@ -1,0 +1,19 @@
+---
+title: "Global STP Analysis - S. pistillata"
+author: "Matt"
+date: "November 16, 2014"
+output: html_document
+---
+
+### Load required libraries
+
+```{r setup}
+library("phyloseq")
+library("ggplot2")
+library("plyr")
+library("vegan")
+library("grid")
+library("directlabels")
+library("knitr")
+opts_knit$set(root.dir = "~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/")
+```

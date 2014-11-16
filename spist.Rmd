@@ -86,3 +86,86 @@ Split into the S.pistillata samples, excluding replicates and the warmed ningalo
 ```{r}
 microSubRelFiltSpist <- prune_samples(c("11","49-2","50-2","51-2","52-2","53-2","54-2","57-2","63-2","64-2","65-2","67-2","80-2","75-2","76-2","77-2","101","102","103","105","173","174","175","176","205","206","207","208","209","226","227","228","229","230","231","235","236","237","241","242","243","244","251","253","254","256","257","258","259","260","261","262","MIC-25","MIC-50","MIC-53","MIC-91","MIC-145","MIC-151","MIC-220","MIC-226","MIC-229","MIC-424","MIC-427","MIC-453","RS1","RS2","RS3","RS5","RS6","RS7","RS10","RS12","RS13","RS15","RS16","RS17","RS18","19-rep2","55-2-rep2","56-2-rep2","104-rep2","MIC-85-rep2"), microSubRelFilt)
 ```
+
+# Relative abundance of otus in all Stylophora pistillata samples
+
+```{r, fig.width = 10}
+microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
+spistBar <- plot_bar(microSubRelFiltSpistFilt, fill="Genus", title='Stylophora pistillata')
+spistBar
+```
+
+Some variability between the samples but plenty of Endozoicomonas. I'll facet out the sites to take a closer look. 
+
+```{r, fig.width= 10}
+microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
+spistBar <- plot_bar(microSubRelFiltSpistFilt, fill="Genus", title='Stylophora pistillata')
+spistBar + facet_wrap(~site, scales='free')
+```
+
+Quite some variability in the microbial componsition across the sites. Can see Endozoicomonas throughout the graph, though it's a little difficult to see. I'll redo the graph with just endozoicomonas OTUs.
+
+```{r, fig.width = 10}
+microSubRelFiltSpistEndo = subset_taxa(microSubRelFiltSpist, Genus=='Endozoicomonas(100)')
+spistBarEndo <- plot_bar(microSubRelFiltSpistEndo, fill="Genus", title='Stylophora pistillata')
+spistBarEndo + facet_wrap(~site, scales='free')
+```
+
+Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites. Note the y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
+
+The Red Sea has the most samples and is a bit hard to see at this scale - I'll take a closer look at these reefs.
+
+```{r, fig.width= 10, fig.height = 8}
+microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
+microSubRelFiltSpistFiltRedSea <- subset_samples(microSubRelFiltSpistFilt, site=="RedSea")
+spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, fill="Genus", title='Stylophora pistillata in the Red Sea')
+spistRedSea + facet_wrap(~reef, scales="free")
+```
+
+Endozoicomonas are fairly abundant throughout all sites, though particularly abundant in the samples I collected last year for the metagenome / single cell study from Al Fahal Reef. The Al Fahal samples collected for this global STP study are not so dominated by Endozoicomonas.
+
+# Ordination of Stylophora pistillata samples
+
+Import NMDS and PCoA files generated in mothur and plot using ggplot
+
+```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
+mothurNMDS <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.nmds.axes", header=T))
+mothurPCOA <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.pcoa.axes", header=T))
+mothurNMDSspearman <- as.data.frame(read.table("micro.spist.0.03.spearman.corr.axes", header=T))
+rownames(mothurNMDS) <- mothurNMDS[,1] 
+rownames(mothurPCOA) <- mothurPCOA[,1]
+rownames(mothurNMDSspearman) <- mothurNMDSspearman[,1]
+
+mothurNMDSmeta <- merge(mothurNMDS, metaFile, by = "row.names")
+mothurPCOAmeta <- merge(mothurPCOA, metaFile, by = "row.names")
+
+mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+  geom_point(aes(x=axis2, y=axis3, color=site))
+mothurNMDSplot
+ggplot(mothurPCOAmeta) +
+  geom_point(aes(x=axis1, y=axis2, color=site)) 
+
+```
+
+I think the NMDS looks better - it explains more of the variation and spreads the samples better.
+
+We can also overlay this plot with the OTUs that most contributed to the sample differences (generated using the indicator command in mothur)
+
+```{r}
+top10indicator = mothurNMDSspearman[c("Otu000004","Otu000007","Otu000019","Otu000045","Otu000095","Otu000384","Otu000502","Otu000035","Otu000032","Otu000015","Otu000142"),]
+arrowmatrix = top10indicator
+arrowdf <- data.frame(labels = rownames(arrowmatrix), arrowmatrix)
+
+# get taxonomic information from the original tax file
+taxFile[rownames(arrowmatrix),"Genus"]
+arrowdf <- data.frame(labels = taxFile[rownames(arrowmatrix),"Genus"], arrowmatrix)
+
+arrowmap <- aes(xend =axis1, yend = axis2, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
+labelmap <- aes(x = axis1, y = axis2 + 0.06, shape = NULL, color = NULL, label = labels, size=2)
+arrowhead = arrow(length = unit(0.02, "npc"))
+mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead) + geom_text(labelmap, size = 4, data = arrowdf)
+mothurNMDSplotArrow 
+```
+
+
