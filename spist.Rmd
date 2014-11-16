@@ -83,7 +83,7 @@ microSubRelFilt = filter_taxa(microSubRel, function(x) mean(x) > 1e-5, TRUE)
 
 # Stylophora pistillata from aquaria
 
-Take a look at the bacteria classified to genus and to family. NOTE: have to do this on non-subsampled data as these get removed in this step because of low sequence number (~3000)
+Take a look at the bacteria classified to genus and to family. NOTE: have to do this on non-subsampled data as these aqarium samples get removed in this step because of low sequence number (~3000)
 
 ```{r}
 spistAq = prune_samples(c("SPaq", "SPaq-rep2"), physeq)
@@ -136,7 +136,7 @@ spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, fill="Genus", title='Sty
 spistRedSea + facet_wrap(~reef, scales="free")
 ```
 
-Endozoicomonas are fairly abundant throughout all sites, though particularly abundant in the samples I collected last year for the metagenome / single cell study from Al Fahal Reef. The Al Fahal samples collected for this global STP study are not so dominated by Endozoicomonas.
+Endozoicomonas are fairly abundant throughout all sites, though this is variable. 
 
 # Ordination of Stylophora pistillata samples
 
