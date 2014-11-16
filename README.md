@@ -1,4 +1,4 @@
 MicrobimePlots
 ==============
 
-Analysis of coral microbiome 16S data using R and phyloseq
+Analysis of large coral microbiome 16S data set (MiSeq) using R and phyloseq
