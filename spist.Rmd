@@ -56,6 +56,7 @@ taxFile = as.matrix(taxFile)
 Import metadata - ie. site, type, etc..
 
 ```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/metaData/')
 metaFile = read.table('pools.metaData2', header=T, sep='\t')
 rownames(metaFile) = metaFile[,1]
 metaFile = metaFile[,2:6]
@@ -70,7 +71,7 @@ TAX = tax_table(taxFile)
 META = sample_data(metaFile)
 physeq = phyloseq(OTU, TAX, META)
 physeqSub = phyloseq(OTUsub, TAX, META)
-physeq
+physeqSub
 ```
 
 Get rid of any OTUs not present in any samples and get relative abundance
@@ -164,8 +165,10 @@ mothurNMDSplot
 mothurNMDSplot + geom_polygon(aes(x=axis2, y=axis3, fill = site), alpha=0.5) + ggtitle("Stylophora pistillata")
 ```
 
+I think the NMDS looks better - it explains more of the variation and spreads the samples better.
 
 Modify shapes so can display the different reefs within the sites
+
 ```{r, fig.width = 8}
 mothurNMDSmeta.shape.names = unique(mothurNMDSmeta$reef)
 mothurNMDSmeta.shape <- 1:(length(mothurNMDSmeta.shape.names))
@@ -178,7 +181,7 @@ mothurNMDSplot <- ggplot(mothurNMDSmeta) +
 mothurNMDSplot
 ```
 
-I think the NMDS looks better - it explains more of the variation and spreads the samples better.
+Actually I think the grouping is much stronger by site rather than by reef. A few of the Ningaloo reefs group together but the Red Sea reefs seem to be all mixed together. 
 
 We can also overlay this plot with the OTUs that most contributed to the sample differences (generated using the indicator command in mothur) or by the spearman correlation
 
@@ -202,5 +205,61 @@ mothurNMDSplot <- ggplot(mothurNMDSmeta) +
 mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead, show_guide = FALSE) + geom_text(labelmap, size = 3, data = arrowdf)
 mothurNMDSplotArrow 
 ```
+
+This result reflects nicely what was in the barplots. Looks like the Ningaloo corals have a different Endozoicomonas OTU than the Red Sea reefs which is highly correlated with the samples. I'll look deeper into different Endozoicomonas types (oligotypes) across sites later. 
+
+Import nutrient and FCM data and look at Spearman correlations between this data and the sample ordinations
+
+```{r, fig.width = 8}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/metaData/')
+Hbact <- as.data.frame(read.table("meta.Hbact.spearman.corr.axes", header=T))
+NH4 <- as.data.frame(read.table("meta.NH4.spearman.corr.axes", header=T))
+NN <- as.data.frame(read.table("meta.NN.spearman.corr.axes", header=T))
+NO2 <- as.data.frame(read.table("meta.NO2.spearman.corr.axes", header=T))
+PEPeuk <- as.data.frame(read.table("meta.PE+Peuk.spearman.corr.axes", header=T))
+Peuk <- as.data.frame(read.table("meta.PEUK.spearman.corr.axes", header=T))
+po4 <- as.data.frame(read.table("meta.po4.spearman.corr.axes", header=T))
+PRO <- as.data.frame(read.table("meta.PRO.spearman.corr.axes", header=T))
+silicate <- as.data.frame(read.table("meta.silicate.spearman.corr.axes", header=T))
+SYN <- as.data.frame(read.table("meta.SYN.spearman.corr.axes", header=T))
+
+nutrients <- rbind(NH4, NN, NO2, po4, silicate)
+FCM <- rbind(Hbact, PEPeuk, Peuk, PRO, SYN)
+
+arrowmatrix = nutrients
+arrowdf <- data.frame(labels = arrowmatrix$Feature, arrowmatrix)
+
+arrowmap <- aes(xend =axis2, yend = axis3, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
+labelmap <- aes(x = axis2, y = axis3 + 0.04, shape = NULL, color = NULL, label = labels, size=1.5)
+arrowhead = arrow(length = unit(0.02, "npc"))
+mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+  geom_point(aes(x=axis2, y=axis3, color=site))
+mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead, show_guide = FALSE) + geom_text(labelmap, size = 3, data = arrowdf)
+mothurNMDSplotArrow 
+
+arrowmatrix = FCM
+arrowdf <- data.frame(labels = arrowmatrix$Feature, arrowmatrix)
+
+arrowmap <- aes(xend =axis2, yend = axis3, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
+labelmap <- aes(x = axis2, y = axis3 + 0.04, shape = NULL, color = NULL, label = labels, size=1.5)
+arrowhead = arrow(length = unit(0.02, "npc"))
+mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+  geom_point(aes(x=axis2, y=axis3, color=site))
+mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead, show_guide = FALSE) + geom_text(labelmap, size = 3, data = arrowdf)
+mothurNMDSplotArrow 
+```
+
+PRO = Prochlorococcus  
+SYN = Synechococcus  
+PEUK = Photosynthetic Eukaryotes  
+PE+PEUK= Photosynthetic Eukaryotes that have a high PE fluorescence and are high in Chl as well  
+HBact = non-pigmented bacteria  
+
+Note in these plots that we don't have data for Indonesia or micronesia (maybe Amy has some), so the vectors cannot point toward those sites and may be a bit misleading - I could draw this with those sites excluded. Anyhow, the Red Sea sites have higher ammonia, while Ningaloo had more silicate and NO2. 
+
+For the FCM results, the Red Sea had more Synechococcus and less Prochlorococcus. 
+
+
+
 
 
