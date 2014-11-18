@@ -81,11 +81,11 @@ microSubRel = transform_sample_counts(microSub, function(x) x / sum(x) )
 microSubRelFilt = filter_taxa(microSubRel, function(x) mean(x) > 1e-5, TRUE)
 ```
 
-# Stylophora pistillata from aquaria
+### Stylophora pistillata from aquaria
 
-Take a look at the bacteria classified to genus and to family. NOTE: have to do this on non-subsampled data as these aqarium samples get removed in this step because of low sequence number (~3000)
+Take a look at the bacteria classified to genus and to family. NOTE: have to do this on non-subsampled data as these aqarium samples get removed in this step because of low sequence numbers (~3000)
 
-```{r}
+```{r, fig.width = 4}
 spistAq = prune_samples(c("SPaq", "SPaq-rep2"), physeq)
 spistAqrelAbund = transform_sample_counts(spistAq, function(x) x / sum(x) )
 spistAqrelAbundFilt = filter_taxa(spistAqrelAbund, function(x) mean(x) > 1e-2, TRUE)
@@ -101,7 +101,7 @@ Ok let's split the dataset into the S.pistillata samples, excluding replicates a
 microSubRelFiltSpist <- prune_samples(c("11","49-2","50-2","51-2","52-2","53-2","54-2","57-2","63-2","64-2","65-2","67-2","80-2","75-2","76-2","77-2","101","102","103","105","173","174","175","176","205","206","207","208","209","226","227","228","229","230","231","235","236","237","241","242","243","244","251","253","254","256","257","258","259","260","261","262","MIC-25","MIC-50","MIC-53","MIC-91","MIC-145","MIC-151","MIC-220","MIC-226","MIC-229","MIC-424","MIC-427","MIC-453","RS1","RS2","RS3","RS5","RS6","RS7","RS10","RS12","RS13","RS15","RS16","RS17","RS18","19-rep2","55-2-rep2","56-2-rep2","104-rep2","MIC-85-rep2"), microSubRelFilt)
 ```
 
-# Relative abundance of otus in all Stylophora pistillata samples
+### Relative abundance of otus in all Stylophora pistillata samples
 
 ```{r, fig.width = 10}
 microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
@@ -138,11 +138,11 @@ spistRedSea + facet_wrap(~reef, scales="free")
 
 Endozoicomonas are fairly abundant throughout all sites, though this is variable. 
 
-# Ordination of Stylophora pistillata samples
+### Ordination of Stylophora pistillata samples
 
 Import NMDS and PCoA files generated in mothur and plot using ggplot
 
-```{r}
+```{r, fig.width = 8}
 setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
 mothurNMDS <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.nmds.axes", header=T))
 mothurPCOA <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.pcoa.axes", header=T))
@@ -154,29 +154,34 @@ rownames(mothurNMDSspearman) <- mothurNMDSspearman[,1]
 mothurNMDSmeta <- merge(mothurNMDS, metaFile, by = "row.names")
 mothurPCOAmeta <- merge(mothurPCOA, metaFile, by = "row.names")
 
-mothurNMDSplot <- ggplot(mothurNMDSmeta) +
-  geom_point(aes(x=axis2, y=axis3, color=site))
-mothurNMDSplot
 ggplot(mothurPCOAmeta) +
   geom_point(aes(x=axis1, y=axis2, color=site)) 
 
+mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+  geom_point(aes(x=axis2, y=axis3, color=site))
+mothurNMDSplot
+
+mothurNMDSplot + geom_polygon(aes(x=axis2, y=axis3, fill = site), alpha=0.5) + ggtitle("Stylophora pistillata")
 ```
 
 I think the NMDS looks better - it explains more of the variation and spreads the samples better.
 
-We can also overlay this plot with the OTUs that most contributed to the sample differences (generated using the indicator command in mothur)
+We can also overlay this plot with the OTUs that most contributed to the sample differences (generated using the indicator command in mothur) or by the spearman correlation
 
-```{r}
+```{r, fig.width = 8}
 top10indicator = mothurNMDSspearman[c("Otu000004","Otu000007","Otu000019","Otu000045","Otu000095","Otu000384","Otu000502","Otu000035","Otu000032","Otu000015","Otu000142"),]
-arrowmatrix = top10indicator
+
+top10spearman = mothurNMDSspearman[c("Otu000001","Otu000019","Otu000054","Otu000005","Otu000007","Otu000110","Otu000045","Otu000142","Otu000014","Otu000031","Otu000062", "Otu000018"),]
+
+arrowmatrix = top10spearman
 arrowdf <- data.frame(labels = rownames(arrowmatrix), arrowmatrix)
 
 # get taxonomic information from the original tax file
 taxFile[rownames(arrowmatrix),"Genus"]
 arrowdf <- data.frame(labels = taxFile[rownames(arrowmatrix),"Genus"], arrowmatrix)
 
-arrowmap <- aes(xend =axis1, yend = axis2, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
-labelmap <- aes(x = axis1, y = axis2 + 0.06, shape = NULL, color = NULL, label = labels, size=2)
+arrowmap <- aes(xend =axis2, yend = axis3, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
+labelmap <- aes(x = axis2, y = axis3 + 0.04, shape = NULL, color = NULL, label = labels, size=2)
 arrowhead = arrow(length = unit(0.02, "npc"))
 mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead) + geom_text(labelmap, size = 4, data = arrowdf)
 mothurNMDSplotArrow 
