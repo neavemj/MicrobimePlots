@@ -164,6 +164,20 @@ mothurNMDSplot
 mothurNMDSplot + geom_polygon(aes(x=axis2, y=axis3, fill = site), alpha=0.5) + ggtitle("Stylophora pistillata")
 ```
 
+
+Modify shapes so can display the different reefs within the sites
+```{r, fig.width = 8}
+mothurNMDSmeta.shape.names = unique(mothurNMDSmeta$reef)
+mothurNMDSmeta.shape <- 1:(length(mothurNMDSmeta.shape.names))
+names(mothurNMDSmeta.shape) <- mothurNMDSmeta.shape.names
+mothurNMDSmeta.shape["samples"] <- 23
+mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+  geom_point(aes(x=axis2, y=axis3, color=site, shape = reef)) +
+  scale_shape_manual(values = mothurNMDSmeta.shape) +
+  theme(legend.key.size=unit(0.3,"cm"))
+mothurNMDSplot
+```
+
 I think the NMDS looks better - it explains more of the variation and spreads the samples better.
 
 We can also overlay this plot with the OTUs that most contributed to the sample differences (generated using the indicator command in mothur) or by the spearman correlation
@@ -181,9 +195,11 @@ taxFile[rownames(arrowmatrix),"Genus"]
 arrowdf <- data.frame(labels = taxFile[rownames(arrowmatrix),"Genus"], arrowmatrix)
 
 arrowmap <- aes(xend =axis2, yend = axis3, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
-labelmap <- aes(x = axis2, y = axis3 + 0.04, shape = NULL, color = NULL, label = labels, size=2)
+labelmap <- aes(x = axis2, y = axis3 + 0.04, shape = NULL, color = NULL, label = labels, size=1.5)
 arrowhead = arrow(length = unit(0.02, "npc"))
-mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead) + geom_text(labelmap, size = 4, data = arrowdf)
+mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+  geom_point(aes(x=axis2, y=axis3, color=site))
+mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead, show_guide = FALSE) + geom_text(labelmap, size = 3, data = arrowdf)
 mothurNMDSplotArrow 
 ```
 
