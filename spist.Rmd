@@ -118,7 +118,7 @@ spistBar <- plot_bar(microSubRelFiltSpistFilt, fill="Genus", title='Stylophora p
 spistBar + facet_wrap(~site, scales='free')
 ```
 
-Quite some variability in the microbial componsition across the sites. Can see Endozoicomonas throughout the graph, though it's a little difficult to see. I'll redo the graph with just endozoicomonas OTUs.
+Quite some variability in the microbial composition across the sites. Can see Endozoicomonas throughout the graph, though it's a little difficult to see. I'll redo the graph with just endozoicomonas OTUs.
 
 ```{r, fig.width = 10, fig.height = 6}
 microSubRelFiltSpistEndo = subset_taxa(microSubRelFiltSpist, Genus=='Endozoicomonas(100)')
@@ -126,7 +126,7 @@ spistBarEndo <- plot_bar(microSubRelFiltSpistEndo, fill="Genus", title='Stylopho
 spistBarEndo + facet_wrap(~site, scales='free')
 ```
 
-Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites. Note the change in y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
+Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites! Note the change in y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
 
 The Red Sea has the most samples and is a bit hard to see at this scale - I'll take a closer look at these reefs.
 
@@ -155,17 +155,17 @@ rownames(mothurNMDSspearman) <- mothurNMDSspearman[,1]
 mothurNMDSmeta <- merge(mothurNMDS, metaFile, by = "row.names")
 mothurPCOAmeta <- merge(mothurPCOA, metaFile, by = "row.names")
 
-ggplot(mothurPCOAmeta) +
+ggplot(mothurPCOAmeta, title='PCoA of Stylophora pistillata samples') +
   geom_point(aes(x=axis1, y=axis2, color=site)) 
 
-mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+mothurNMDSplot <- ggplot(mothurNMDSmeta, title='nMDS of Stylophora pistillata samples') +
   geom_point(aes(x=axis2, y=axis3, color=site))
 mothurNMDSplot
 
-mothurNMDSplot + geom_polygon(aes(x=axis2, y=axis3, fill = site), alpha=0.5) + ggtitle("Stylophora pistillata")
+mothurNMDSplot + geom_polygon(aes(x=axis2, y=axis3, fill = site), alpha=0.5) + ggtitle("nMDS of Stylophora pistillata samples")
 ```
 
-I think the NMDS looks better - it explains more of the variation and spreads the samples better.
+I think the nMDS looks better - it explains more of the variation and spreads the samples better.
 
 Modify shapes so can display the different reefs within the sites
 
@@ -174,7 +174,7 @@ mothurNMDSmeta.shape.names = unique(mothurNMDSmeta$reef)
 mothurNMDSmeta.shape <- 1:(length(mothurNMDSmeta.shape.names))
 names(mothurNMDSmeta.shape) <- mothurNMDSmeta.shape.names
 mothurNMDSmeta.shape["samples"] <- 23
-mothurNMDSplot <- ggplot(mothurNMDSmeta) +
+mothurNMDSplot <- ggplot(mothurNMDSmeta, title='nMDS of Stylophora pistillata with reef symbols') +
   geom_point(aes(x=axis2, y=axis3, color=site, shape = reef)) +
   scale_shape_manual(values = mothurNMDSmeta.shape) +
   theme(legend.key.size=unit(0.3,"cm"))
