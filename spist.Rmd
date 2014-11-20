@@ -15,6 +15,7 @@ library("vegan")
 library("grid")
 library("directlabels")
 library("knitr")
+library("clustsig")
 opts_knit$set(root.dir = "~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/")
 ```
 
@@ -35,6 +36,7 @@ class(sharedFile) <- "numeric"
 Import subsampled otu matrix (7779 seqs)
 
 ```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
 sharedsubFile = read.table('micro.final.clean.0.03.subsample.shared')
 sharedsubFile = t(sharedsubFile)
 rownames(sharedsubFile) = sharedsubFile[,1]
@@ -258,6 +260,29 @@ HBact = non-pigmented bacteria
 Note in these plots that we don't have data for Indonesia or micronesia (maybe Amy has some), so the vectors cannot point toward those sites and may be a bit misleading - I could draw this with those sites excluded. Anyhow, the Red Sea sites have higher ammonia, while Ningaloo had more silicate and NO2. 
 
 For the FCM results, the Red Sea had more Synechococcus and less Prochlorococcus. 
+
+### SIMPROF analysis to check which samples fall into 'groups' without any a priori assumptions
+
+Need to import just the shared file containing just spist OTUs
+
+```{r}
+setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
+spistShared = read.table('micro.spist.0.03.shared')
+spistShared = t(spistShared)
+rownames(spistShared) = spistShared[,1]
+colnames(spistShared) = spistShared[2,]
+spistShared = spistShared[,2:81]
+spistShared = spistShared[4:4813,]
+class(spistShared) <- "numeric"
+
+spistSIMPROF <- simprof(spistShared, num.expected=10, num.simulated=99, method.cluster='average', method.distance='braycurtis', method.transform='identity', alpha=0.05, sample.orientation='column', silent=FALSE)
+
+simprof.plot(spistSIMPROF, leafcolors=NA, plot=TRUE, fill=TRUE, leaflab="perpendicular", siglinetype=1)
+
+```
+
+method.transform='squareroot' had 21 groups, many with just a single sample
+method.transform='identity' (no transformation) had 21 groups, many with just a single sample
 
 
 
