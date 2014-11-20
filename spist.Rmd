@@ -147,9 +147,10 @@ Import NMDS and PCoA files generated in mothur and plot using ggplot
 
 ```{r, fig.width = 8}
 setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
-mothurNMDS <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.nmds.axes", header=T))
-mothurPCOA <- as.data.frame(read.table("micro.spist.0.03.thetayc.0.03.lt.pcoa.axes", header=T))
-mothurNMDSspearman <- as.data.frame(read.table("micro.spist.0.03.spearman.corr.axes", header=T))
+mothurNMDS <- as.data.frame(read.table("micro.spist.0.03.braycurtis.0.03.lt.nmds.axes", header=T))
+mothurPCOA <- as.data.frame(read.table("micro.spist.0.03.braycurtis.0.03.lt.pcoa.axes", header=T))
+
+mothurNMDSspearman <- as.data.frame(read.table("micro.spist.0.03.braycurtis.spearman.corr.axes", header=T))
 rownames(mothurNMDS) <- mothurNMDS[,1] 
 rownames(mothurPCOA) <- mothurPCOA[,1]
 rownames(mothurNMDSspearman) <- mothurNMDSspearman[,1]
@@ -161,10 +162,10 @@ ggplot(mothurPCOAmeta, title='PCoA of Stylophora pistillata samples') +
   geom_point(aes(x=axis1, y=axis2, color=site)) 
 
 mothurNMDSplot <- ggplot(mothurNMDSmeta, title='nMDS of Stylophora pistillata samples') +
-  geom_point(aes(x=axis2, y=axis3, color=site))
+  geom_point(aes(x=axis1, y=axis2, color=site))
 mothurNMDSplot
 
-mothurNMDSplot + geom_polygon(aes(x=axis2, y=axis3, fill = site), alpha=0.5) + ggtitle("nMDS of Stylophora pistillata samples")
+mothurNMDSplot + geom_polygon(aes(x=axis1, y=axis2, fill = site), alpha=0.5) + ggtitle("nMDS of Stylophora pistillata samples")
 ```
 
 I think the nMDS looks better - it explains more of the variation and spreads the samples better.
@@ -275,14 +276,15 @@ spistShared = spistShared[,2:81]
 spistShared = spistShared[4:4813,]
 class(spistShared) <- "numeric"
 
-spistSIMPROF <- simprof(spistShared, num.expected=10, num.simulated=99, method.cluster='average', method.distance='braycurtis', method.transform='identity', alpha=0.05, sample.orientation='column', silent=FALSE)
+spistSIMPROF <- simprof(spistShared, num.expected=100, num.simulated=99, method.cluster='average', method.distance='euclidean', method.transform='identity', alpha=0.05, sample.orientation='column', silent=FALSE)
 
 simprof.plot(spistSIMPROF, leafcolors=NA, plot=TRUE, fill=TRUE, leaflab="perpendicular", siglinetype=1)
 
 ```
 
-method.transform='squareroot' had 21 groups, many with just a single sample
-method.transform='identity' (no transformation) had 21 groups, many with just a single sample
+euclidean and 'squareroot' had 21 groups, many with just a single sample
+euclidean and 'identity' (no transformation) had 12 groups, 
+braycurtis had 30-40 groups
 
 
 
