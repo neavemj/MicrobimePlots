@@ -7,6 +7,10 @@ output: html_document
 
 ### Load required libraries
 
+/home/neave/R
+
+install.packages("/home/neave/R/clustsig_1.1.tar.gz", repos = NULL, type="source")
+
 ```{r setup}
 library("phyloseq")
 library("ggplot2")
@@ -15,7 +19,7 @@ library("vegan")
 library("grid")
 library("directlabels")
 library("knitr")
-library("clustsig")
+#library("clustsig")
 opts_knit$set(root.dir = "~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/")
 ```
 
@@ -57,7 +61,7 @@ taxFile = as.matrix(taxFile)
 Import metadata - ie. site, type, etc..
 
 ```{r}
-setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/metaData/')
+#setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/metaData/')
 metaFile = read.table('pools.metaData2', header=T, sep='\t')
 rownames(metaFile) = metaFile[,1]
 metaFile = metaFile[,2:6]
