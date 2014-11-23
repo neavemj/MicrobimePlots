@@ -36,7 +36,6 @@ class(sharedFile) <- "numeric"
 Import subsampled otu matrix (7779 seqs)
 
 ```{r}
-setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/')
 sharedsubFile = read.table('micro.final.clean.0.03.subsample.shared')
 sharedsubFile = t(sharedsubFile)
 rownames(sharedsubFile) = sharedsubFile[,1]
