@@ -15,8 +15,8 @@ library("vegan")
 library("grid")
 library("directlabels")
 library("knitr")
-#library("clustsig")
-setwd("/home/neave/data/3.globalMicrobiome/3.mothur/2.poolsCombined/spist")
+library("clustsig")
+setwd("./data")
 opts_knit$set(root.dir = "/home/neave/data/3.globalMicrobiome/3.mothur/2.poolsCombined/spist")
 ```
 
