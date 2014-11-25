@@ -17,6 +17,7 @@ library("grid")
 library("directlabels")
 library("knitr")
 library("clustsig")
+library("ellipse")
 setwd("./data")
 opts_knit$set(root.dir = "./data")
 ```
@@ -185,6 +186,7 @@ rownames(mothurPCOA) <- mothurPCOA[,1]
 rownames(mothurNMDSspearman) <- mothurNMDSspearman[,1]
 
 mothurNMDSmeta <- merge(mothurNMDS, metaFile, by = "row.names")
+rownames(mothurNMDSmeta) <- mothurNMDSmeta[,1]
 mothurPCOAmeta <- merge(mothurPCOA, metaFile, by = "row.names")
 
 ggplot(mothurPCOAmeta, title='PCoA of Stylophora pistillata samples') +
@@ -322,16 +324,28 @@ spistSIMPROF <- simprof(spistShared, num.expected=10, num.simulated=9, method.cl
 
 simprof.plot(spistSIMPROF, leafcolors=NA, plot=TRUE, fill=TRUE, leaflab="perpendicular", siglinetype=1)
 
-#plot over nMDS
+# need to add these groups to the nMDS data.frame - I'll do a for loop for this
 
-library("ellipse")
+simprofCLUSTERS = data.frame()
 
-df_ell <- data.frame()
-for(g in levels(mothurNMDSmeta$site)){
-  df_ell <- rbind(df_ell, cbind(as.data.frame(with(mothurNMDSmeta[mothurNMDSmeta$site==g,], ellipse(cor(axis1, axis2), scale=c(sd(axis1), sd(axis2)), centre=c(mean(axis1), mean(axis2))))),site=g))
+for(j in 1:length(spistSIMPROF$significantclusters)){
+  if(length(spistSIMPROF$significantclusters[[j]]) > 4){
+    simprofCLUSTERS <- rbind(simprofCLUSTERS, cbind(j, spistSIMPROF$significantclusters[[j]]))
+  }
 }
 
-ggplot(data=mothurNMDSmeta, aes(x=axis1, y=axis2, color=site)) +
+rownames(simprofCLUSTERS) <- simprofCLUSTERS[,2]
+colnames(simprofCLUSTERS) <- c("simprofCLUSTER", "group")
+mothurNMDSmetaSIMP <- merge(mothurNMDSmeta, simprofCLUSTERS, by="row.names")
+
+#plot over nMDS
+
+df_ell <- data.frame()
+for(g in levels(mothurNMDSmetaSIMP$simprofCLUSTER)){
+  df_ell <- rbind(df_ell, cbind(as.data.frame(with(mothurNMDSmetaSIMP[mothurNMDSmetaSIMP$simprofCLUSTER==g,], ellipse(cor(axis2, axis3), scale=c(sd(axis2), sd(axis3)), centre=c(mean(axis2), mean(axis3))))),site=g))
+}
+
+ggplot(data=mothurNMDSmeta, aes(x=axis2, y=axis3, color=site)) +
   geom_point(size=1.5, alpha=0.6) +
   geom_path(data=df_ell, aes(x=x, y=y, color=site), size=1, linetype=1)
 
