@@ -7,14 +7,6 @@ output: html_document
 
 ### Load required libraries
 
-#source("http://bioconductor.org/biocLite.R")
-#biocLite("phyloseq")
-#install.packages("ggplot2")
-#install.packages("plyr")
-#install.packages("vegan")
-#install.packages("directlabels")
-#install.packages("knitr")
-#install.packages("clustsig")
 
 ```{r setup}
 library("phyloseq")
@@ -153,7 +145,7 @@ Endozoicomonas are fairly abundant throughout all sites, though this is variable
 
 Which distance measure to use?
 
-```{r}
+```{r, fig.width = 10, fig.heigth = 10}
 dist_methods <- unlist(distance("list"))
 dist_methods <- dist_methods[-(1:2)]
 dist_methods <- dist_methods[-which(dist_methods == "ANY")]
@@ -179,7 +171,9 @@ p
 
 ```
 
-Import NMDS and PCoA files generated in mothur and plot using ggplot
+Pretty hard to decide on a distance metric I think - most people use Bray Curtis so guess I'll use that even though but I'm pretty sure Pat Schloss (the mothur guy) doesn't like this measure. 
+
+Use the braycurtis matrix to generate plots using nMDS and PCoA
 
 ```{r, fig.width = 8}
 mothurNMDS <- as.data.frame(read.table("micro.spist.0.03.braycurtis.0.03.lt.nmds.axes", header=T))
@@ -240,11 +234,26 @@ labelmap <- aes(x = axis2, y = axis3 + 0.04, shape = NULL, color = NULL, label =
 arrowhead = arrow(length = unit(0.02, "npc"))
 mothurNMDSplot <- ggplot(mothurNMDSmeta) +
   geom_point(aes(x=axis2, y=axis3, color=site))
-mothurNMDSplotArrow = mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead, show_guide = FALSE) + geom_text(labelmap, size = 3, data = arrowdf)
+mothurNMDSplotArrow <- mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead, show_guide = FALSE) + geom_text(labelmap, size = 3, data = arrowdf)
 mothurNMDSplotArrow 
 ```
 
 This result reflects nicely what was in the barplots. Looks like the Ningaloo corals have a different Endozoicomonas OTU than the Red Sea reefs which is highly correlated with the samples. I'll look deeper into different Endozoicomonas types (oligotypes) across sites later. 
+
+Also can do a SIMPER analysis on these matrices to check how much variation particular OTUs explain
+
+```{r}
+spistSharedSIMP = read.table('micro.spist.0.03.shared', header=TRUE)
+rownames(spistSharedSIMP) <- spistSharedSIMP[,2]
+spistSharedSIMP = spistSharedSIMP[,4:4813]
+spistDistSIMP <- merge(spistSharedSIMP, metaFile, by="row.names")
+spistDistSIMP[,4810:4812]
+rownames(spistDistSIMP) <- spistDistSIMP[,1]
+OTUsSIMP <- spistDistSIMP[,2:4811]
+factorsSIMP <- spistDistSIMP[,4812:4816]
+
+spistSIMP <- simper(OTUsSIMP, factorsSIMP$site)
+```
 
 Import nutrient and FCM data and look at Spearman correlations between this data and the sample ordinations
 
@@ -309,11 +318,11 @@ spistShared = spistShared[,2:81]
 spistShared = spistShared[4:4813,]
 class(spistShared) <- "numeric"
 
-spistSIMPROF <- simprof(spistShared, num.expected=10, num.simulated=99, method.cluster='average', method.distance='euclidean', method.transform='identity', alpha=0.05, sample.orientation='column', silent=FALSE)
+spistSIMPROF <- simprof(spistShared, num.expected=10, num.simulated=9, method.cluster='average', method.distance='euclidean', method.transform='identity', alpha=0.05, sample.orientation='column', silent=FALSE)
 
 simprof.plot(spistSIMPROF, leafcolors=NA, plot=TRUE, fill=TRUE, leaflab="perpendicular", siglinetype=1)
-
 ```
+
 
 euclidean and 'squareroot' had 21 groups, many with just a single sample
 euclidean and 'identity' (no transformation) had 12 groups, 
