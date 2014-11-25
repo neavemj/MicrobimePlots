@@ -318,16 +318,29 @@ spistShared = spistShared[,2:81]
 spistShared = spistShared[4:4813,]
 class(spistShared) <- "numeric"
 
-spistSIMPROF <- simprof(spistShared, num.expected=10, num.simulated=9, method.cluster='average', method.distance='euclidean', method.transform='identity', alpha=0.05, sample.orientation='column', silent=FALSE)
+spistSIMPROF <- simprof(spistShared, num.expected=10, num.simulated=9, method.cluster='average', method.distance='braycurtis', method.transform='identity', alpha=0.05, sample.orientation='column', silent=FALSE)
 
 simprof.plot(spistSIMPROF, leafcolors=NA, plot=TRUE, fill=TRUE, leaflab="perpendicular", siglinetype=1)
-```
 
+#plot over nMDS
+
+library("ellipse")
+
+df_ell <- data.frame()
+for(g in levels(mothurNMDSmeta$site)){
+  df_ell <- rbind(df_ell, cbind(as.data.frame(with(mothurNMDSmeta[mothurNMDSmeta$site==g,], ellipse(cor(axis1, axis2), scale=c(sd(axis1), sd(axis2)), centre=c(mean(axis1), mean(axis2))))),site=g))
+}
+
+ggplot(data=mothurNMDSmeta, aes(x=axis1, y=axis2, color=site)) +
+  geom_point(size=1.5, alpha=0.6) +
+  geom_path(data=df_ell, aes(x=x, y=y, color=site), size=1, linetype=1)
+
+```
 
 euclidean and 'squareroot' had 21 groups, many with just a single sample
 euclidean and 'identity' (no transformation) had 12 groups, 
-braycurtis had 30-40 groups
-
+braycurtis, 'identity', had 37 and some bigger groups
+braycurtis, 'squareroot', had 43 clusters and not many bigger groups..
 
 
 
