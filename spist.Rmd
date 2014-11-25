@@ -59,7 +59,7 @@ Import taxonomy file from mothur
 
 ```{r}
 taxFile = read.table('micro.final.0.03.cons.taxonomy', header=T, sep='\t')
-#rownames(taxFile) = taxFile[,1]
+rownames(taxFile) = taxFile[,1]
 taxFile = taxFile[,2:8]
 taxFile = as.matrix(taxFile)
 ```
@@ -80,7 +80,7 @@ OTUsub = otu_table(sharedsubFile, taxa_are_rows = TRUE)
 TAX = tax_table(taxFile)
 META = sample_data(metaFile)
 physeq = phyloseq(OTU, TAX, META)
-physeqSub = phyloseq(OTUsub, TAX) #, META)
+physeqSub = phyloseq(OTUsub, TAX, META)
 physeqSub
 ```
 
@@ -156,7 +156,7 @@ Which distance measure to use?
 ```{r}
 dist_methods <- unlist(distance("list"))
 dist_methods <- dist_methods[-(1:2)]
-dist_metods <- dist_methods[-which(dist_methods == "ANY")]
+dist_methods <- dist_methods[-which(dist_methods == "ANY")]
 
 plist <- vector("list", length(dist_methods))
 names(plist) = dist_methods
@@ -164,10 +164,18 @@ for (j in dist_methods) {
   iDist <- distance(microSubRelFiltSpistFilt, method = j)
   iMDS <- ordinate(microSubRelFiltSpistFilt, "MDS", distance = iDist)
   p <- NULL
-  p <- plot_ordination(microSubRelFiltSpistFilt, iMDS)
-  p <- p + ggtitle(paste("MDS using distance method ", i, sep=""))
+  p <- plot_ordination(microSubRelFiltSpistFilt, iMDS, color="site")
+  p <- p + ggtitle(paste("MDS using distance method ", j, sep=""))
   plist[[j]] = p
 }
+
+df = ldply(plist, function(x) x$data)
+names(df)[1] <- "distance"
+p = ggplot(df, aes(Axis.1, Axis.2, color=site))
+p = p + geom_point(size = 3, alpha = 0.5)
+p = p + facet_wrap(~distance, scales = "free")
+p = p + ggtitle("MDS on various distance metrics")
+p
 
 ```
 
@@ -177,15 +185,15 @@ Import NMDS and PCoA files generated in mothur and plot using ggplot
 mothurNMDS <- as.data.frame(read.table("micro.spist.0.03.braycurtis.0.03.lt.nmds.axes", header=T))
 mothurPCOA <- as.data.frame(read.table("micro.spist.0.03.braycurtis.0.03.lt.pcoa.axes", header=T))
 
-#mothurNMDSspearman <- as.data.frame(read.table("micro.spist.0.03.braycurtis.spearman.corr.axes", header=T))
+mothurNMDSspearman <- as.data.frame(read.table("micro.spist.0.03.spearman.corr.axes", header=T))
 rownames(mothurNMDS) <- mothurNMDS[,1] 
 rownames(mothurPCOA) <- mothurPCOA[,1]
-#rownames(mothurNMDSspearman) <- mothurNMDSspearman[,1]
+rownames(mothurNMDSspearman) <- mothurNMDSspearman[,1]
 
-#mothurNMDSmeta <- merge(mothurNMDS, metaFile, by = "row.names")
-#mothurPCOAmeta <- merge(mothurPCOA, metaFile, by = "row.names")
+mothurNMDSmeta <- merge(mothurNMDS, metaFile, by = "row.names")
+mothurPCOAmeta <- merge(mothurPCOA, metaFile, by = "row.names")
 
-ggplot(mothurPCOA, title='PCoA of Stylophora pistillata samples') +
+ggplot(mothurPCOAmeta, title='PCoA of Stylophora pistillata samples') +
   geom_point(aes(x=axis1, y=axis2, color=site)) 
 
 mothurNMDSplot <- ggplot(mothurNMDSmeta, title='nMDS of Stylophora pistillata samples') +
@@ -227,7 +235,7 @@ arrowdf <- data.frame(labels = rownames(arrowmatrix), arrowmatrix)
 taxFile[rownames(arrowmatrix),"Genus"]
 arrowdf <- data.frame(labels = taxFile[rownames(arrowmatrix),"Genus"], arrowmatrix)
 
-arrowmap <- aes(xend =axis2, yend = axis3, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
+arrowmap <- aes(xend = axis2, yend = axis3, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
 labelmap <- aes(x = axis2, y = axis3 + 0.04, shape = NULL, color = NULL, label = labels, size=1.5)
 arrowhead = arrow(length = unit(0.02, "npc"))
 mothurNMDSplot <- ggplot(mothurNMDSmeta) +

@@ -116,8 +116,8 @@ MIC-453	Nak-2 (Nukuoro, Dive 2)	Stylophora pistillata	Micronesia	FALSE	FALSE
 SPaq-rep2	Kept in aquarium (coll. Red Sea)	Stylophora pistillata	RedSea	FALSE	TRUE
 RP7-rep2	14-17	Pocillopora verrucosa	Indonesia	FALSE	TRUE
 RP8-rep2	14-20	Pocillopora verrucosa	Indonesia	FALSE	TRUE
-RS5-rep2	RA-5	Stylophora pistillata	Indonesia	FALSE	TRUE
-RS7-rep2	RJ-2	Stylophora pistillata	Indonesia	FALSE	TRUE
+RS5-rep2	RA	Stylophora pistillata	Indonesia	FALSE	TRUE
+RS7-rep2	RJ	Stylophora pistillata	Indonesia	FALSE	TRUE
 END74-rep2	Metagenome study	Stylophora pistillata	RedSea	FALSE	TRUE
 END59-rep2	Metagenome study	Pocillopora verrucosa	RedSea	FALSE	TRUE
 END62-rep2	Metagenome study	Acropora humilis	RedSea	FALSE	TRUE
@@ -149,19 +149,19 @@ RP27	7-21	Pocillopora verrucosa	Indonesia	FALSE	FALSE
 RP28	7-22	Pocillopora verrucosa	Indonesia	FALSE	FALSE
 RP29	7-23	Pocillopora verrucosa	Indonesia	FALSE	FALSE
 RP30	7-24	Pocillopora verrucosa	Indonesia	FALSE	FALSE
-RS1	RA-1	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS2	RA-2	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS3	RA-3	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS5	RA-5	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS6	RJ-1	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS7	RJ-2	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS10	RW-2	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS12	RW-4	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS13	RK-1	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS15	RK-3	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS16	RK-4	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS17	RK-5	Stylophora pistillata	Indonesia	FALSE	FALSE
-RS18	RK-6	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS1	RA	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS2	RA	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS3	RA	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS5	RA	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS6	RJ	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS7	RJ	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS10	RW	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS12	RW	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS13	RK	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS15	RK	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS16	RK	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS17	RK	Stylophora pistillata	Indonesia	FALSE	FALSE
+RS18	RK	Stylophora pistillata	Indonesia	FALSE	FALSE
 Yanbu1A	Yanbu1A	seawater	RedSea	FALSE	FALSE
 Yanbu1B	Yanbu1B	seawater	RedSea	FALSE	FALSE
 Yanbu2A	Yanbu2A	seawater	RedSea	FALSE	FALSE
