@@ -153,7 +153,6 @@ The sample numbers with -2 at the end are the PFA preserved samples, the others 
 Make data frame for ggplot, then plot rarefaction of mock community OTUs. Red dotted line indicates expected number of OTUs. 
 
 ```{r, fig.width = 8, warning=FALSE}
-setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
 rareEvenPool1 <- read.delim("micro.final.mockEvenPool1.rarefaction", header=T)
 colnames(rareEvenPool1) <- c("numsampled", "evP1")
 rareStaggeredPool1 <- read.table("micro.final.mockStaggeredPool1.rarefaction", header=T)
@@ -186,7 +185,6 @@ Interesting result - we can see that more sequencing results in more spurious OT
 First the even mock community from pool1. Red dotted line is the expected abundance of each of the taxa. 
 
 ```{r, fig.width = 8}
-setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
 evP1shared = read.table('micro.final.mockEvenPool1.shared')
 evP1shared = t(evP1shared)
 rownames(evP1shared) = evP1shared[,1]
@@ -221,7 +219,6 @@ The very small bars to the right must be the spurious OTUs generated from errors
 ggplot bar plot for even pool 2
 
 ```{r, fig.width = 8}
-setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
 evP2shared = read.table('micro.final.mockEvenPool2.shared')
 evP2shared = t(evP2shared)
 rownames(evP2shared) = evP2shared[,1]
@@ -255,7 +252,6 @@ Similar result to last time. The Staphylococcus bar contains 2 OTUs and neither 
 Calculate relative abundance of the staggered mock communities and overlay this data with what was expected. 
 
 ```{r, fig.width = 8, fig.height = 6}
-setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
 stgP1shared = read.table('micro.final.mockStaggeredPool1.shared')
 stgP1shared = t(stgP1shared)
 rownames(stgP1shared) = stgP1shared[,1]
@@ -298,7 +294,6 @@ These are pretty good. The blue dots (expected) generally follow the obtained ab
 ggplot bar plot for staggered pool2
 
 ```{r, fig.width = 8, fig.height = 6}
-setwd('~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/5.mock9Nov14/')
 stgP2shared = read.table('micro.final.mockStaggeredPool2.shared')
 stgP2shared = t(stgP2shared)
 rownames(stgP2shared) = stgP2shared[,1]
