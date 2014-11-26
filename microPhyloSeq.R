@@ -9,6 +9,10 @@ biocLite("phyloseq")
 
 source("http://bioconductor.org/biocLite.R")
 biocLite("phyloseq")
+
+library("devtools")
+install_github("phyloseq", "joey711")
+
 install.packages("ggplot2")
 install.packages("plyr")
 install.packages("vegan")
@@ -85,7 +89,7 @@ sample_variables(physeqSub)
 
 # do some richness plots on untrimmed data to get acurate estimates
 
-microRich = plot_richness(micro, x = 'species', measures = c('Chao1', 'Shannon', 'observed'), color = 'site')
+microRich = plot_richness(micro, x = 'species', measures = c('Chao1', 'Shannon', 'Observed'), color = 'site')
 microRich + geom_boxplot(data = microRich$data, aes(x = species, y = value, color = NULL), 
                          alpha = 0.1)
 
