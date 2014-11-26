@@ -8,7 +8,7 @@ output: html_document
 ### Load required libraries
 
 
-```{r setup}
+```{r setup, message=FALSE}
 library("phyloseq")
 library("ggplot2")
 library("plyr")
@@ -136,8 +136,8 @@ The Red Sea has the most samples and is a bit hard to see at this scale - I'll t
 ```{r, fig.width= 10, fig.height = 8}
 microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
 microSubRelFiltSpistFiltRedSea <- subset_samples(microSubRelFiltSpistFilt, site=="RedSea")
-spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, fill="Genus", title='Stylophora pistillata in the Red Sea')
-spistRedSea + facet_wrap(~reef, scales="free")
+spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, aes(x=factor(Sample)), fill="Genus", title='Stylophora pistillata in the Red Sea')
+spistRedSea + facet_wrap(~reef, scales="free_x")
 ```
 
 Endozoicomonas are fairly abundant throughout all sites, though this is variable. 
@@ -146,7 +146,7 @@ Endozoicomonas are fairly abundant throughout all sites, though this is variable
 
 Which distance measure to use?
 
-```{r, fig.width = 10, fig.heigth = 10}
+```{r, fig.width = 10, fig.height = 10, warning=FALSE}
 dist_methods <- unlist(distance("list"))
 dist_methods <- dist_methods[-(1:2)]
 dist_methods <- dist_methods[-which(dist_methods == "ANY")]
@@ -165,14 +165,14 @@ for (j in dist_methods) {
 df = ldply(plist, function(x) x$data)
 names(df)[1] <- "distance"
 p = ggplot(df, aes(Axis.1, Axis.2, color=site))
-p = p + geom_point(size = 3, alpha = 0.5)
+p = p + geom_point(size = 2, alpha = 0.5)
 p = p + facet_wrap(~distance, scales = "free")
 p = p + ggtitle("MDS on various distance metrics")
 p
 
 ```
 
-Pretty hard to decide on a distance metric I think - most people use Bray Curtis so guess I'll use that even though but I'm pretty sure Pat Schloss (the mothur guy) doesn't like this measure. 
+Pretty hard to decide on a distance metric I think - most people use Bray Curtis so guess I'll use that - even though I'm pretty sure Pat Schloss (the mothur guy) doesn't like this measure. 
 
 Use the braycurtis matrix to generate plots using nMDS and PCoA
 
@@ -190,13 +190,13 @@ rownames(mothurNMDSmeta) <- mothurNMDSmeta[,1]
 mothurPCOAmeta <- merge(mothurPCOA, metaFile, by = "row.names")
 
 ggplot(mothurPCOAmeta, title='PCoA of Stylophora pistillata samples') +
-  geom_point(aes(x=axis1, y=axis2, color=site)) 
+  geom_point(aes(x=axis2, y=axis3, color=site)) 
 
 mothurNMDSplot <- ggplot(mothurNMDSmeta, title='nMDS of Stylophora pistillata samples') +
-  geom_point(aes(x=axis1, y=axis2, color=site))
+  geom_point(aes(x=axis2, y=axis3, color=site))
 mothurNMDSplot
 
-mothurNMDSplot + geom_polygon(aes(x=axis1, y=axis2, fill = site), alpha=0.5) + ggtitle("nMDS of Stylophora pistillata samples")
+mothurNMDSplot + geom_polygon(aes(x=axis2, y=axis3, fill = site), alpha=0.5) + ggtitle("nMDS of Stylophora pistillata samples")
 ```
 
 I think the nMDS looks better - it explains more of the variation and spreads the samples better.
@@ -256,6 +256,8 @@ factorsSIMP <- spistDistSIMP[,4812:4816]
 spistSIMP <- simper(OTUsSIMP, factorsSIMP$site)
 ```
 
+### Correlations between chemical data and microbes
+
 Import nutrient and FCM data and look at Spearman correlations between this data and the sample ordinations
 
 ```{r, fig.width = 8}
@@ -306,13 +308,11 @@ Note in these plots that we don't have data for Indonesia or micronesia (maybe A
 
 For the FCM results, the Red Sea had more Synechococcus and less Prochlorococcus. 
 
-### SIMPROF analysis to check which samples fall into 'groups' without any a priori assumptions
+### SIMPROF analysis to check which samples fall into 'groups' without any *a priori* assumptions
 
 Need to import the shared file containing just spist OTUs, then calcualte the simprof clusters based on the braycurtis metric. 
 
-After calculating the clusters, make a data frame of the results and add to previous nMDS plot.
-
-```{r}
+```{r, fig.width = 10, warning=FALSE}
 spistShared = read.table('micro.spist.0.03.shared')
 spistShared = t(spistShared)
 rownames(spistShared) = spistShared[,1]
@@ -324,8 +324,13 @@ class(spistShared) <- "numeric"
 spistSIMPROF <- simprof(spistShared, num.expected=10, num.simulated=9, method.cluster='average', method.distance='braycurtis', method.transform='identity', alpha=0.05, sample.orientation='column', silent=FALSE)
 
 simprof.plot(spistSIMPROF, leafcolors=NA, plot=TRUE, fill=TRUE, leaflab="perpendicular", siglinetype=1)
+```
 
-# need to add these groups to the nMDS data.frame - I'll do a for loop for this
+Ok, pretty cool but bit difficult to tell which groups are falling out. I'll try and overlay the significant clusters on top of the nMDS. 
+
+After calculating the clusters, make a data frame of the results and add to previous nMDS plot. Need to add these groups to the nMDS data.frame - I'll do a loop for this.
+
+```{r, fig.width = 9, fig.height = 7, warning=FALSE}
 
 simprofCLUSTERS = data.frame()
 
@@ -346,41 +351,46 @@ for(g in levels(mothurNMDSmetaSIMP$simprofCLUSTER)){
   df_ell <- rbind(df_ell, cbind(as.data.frame(with(mothurNMDSmetaSIMP[mothurNMDSmetaSIMP$simprofCLUSTER==g,], ellipse(cor(axis2, axis3), scale=c(sd(axis2), sd(axis3)), centre=c(mean(axis2), mean(axis3))))),site=g))
 }
 
-
 nMDSsimprof <- ggplot(data=mothurNMDSmeta, aes(x=axis2, y=axis3, color=site)) +
-  geom_point(size=3, alpha=0.6) +
+  geom_point(size=2, alpha=0.6) +
   scale_color_hue(limits=levels(droplevels(mothurNMDSmeta$site)))
 nMDSsimprof
 
 nMDS.mean <- aggregate(df_ell, list(df_ell$site), FUN=mean)
 
+#write.table(df_ell, file="simpBrayIdent.txt")
+#write.table(nMDS.mean, file="simpBrayIdentMean.txt")
+
+df_ell_saved <- (read.table("simpBrayIdent.txt"))
+df_ell_saved$site <- factor(df_ell_saved$site)
+nMDS.mean.saved <- read.table("simpBrayIdentMean.txt")
+
 nMDSsimprof +
-  geom_path(data=df_ell, aes(x=x, y=y, color=site), size=1, linetype=2, show_guide=FALSE) +
-  annotate("text", x=nMDS.mean$x, y=nMDS.mean$y, label=nMDS.mean$Group.1)
-  
+  geom_path(data=df_ell_saved, aes(x=x, y=y, color=site), size=0.5, linetype=2, show_guide=FALSE) +
+  annotate("text", x=nMDS.mean.saved$x, y=nMDS.mean.saved$y, label=nMDS.mean.saved$Group.1)
 ```
 
-Check which samples are in the clusters.
+Looks a bit busy but actually some pretty cool clusters coming out here. I went back to the spreadsheet and photos to check out if there were any patterns to the clusters. 
 
-```{r, eval=FALSE}
-#mothurNMDSmetaSIMP[mothurNMDSmetaSIMP$simprofCLUSTER==6,"group.x"]
 
-3 - 103  RS12 RS15 RS16 RS17 RS18 (Rita's sites RW and RK)
-5 - RS1 RS2 RS3 RS5 RS6 RS7 (Ritas sites RA and RJ)
+mothurNMDSmetaSIMP[mothurNMDSmetaSIMP$simprofCLUSTER==6,"group.x"]
 
-7 - 52-2  MIC-85-rep2 RS13 (Ningaloo 1, Woleai, RK)
-10 - 75-2 76-2 77-2 (all Ningaloo site 4, normal looking Stylophora)
-11 - 11 49-2 50-2 51-2 53-2 57-2 63-2 64-2 65-2 (Ningaloo sites 1-3, normal looking Stylophora)
+**Clusters**  
+**3** - 103  RS12 RS15 RS16 RS17 RS18 **Rita's sites RW and RK**  
+**5** - RS1 RS2 RS3 RS5 RS6 RS7 **Ritas sites RA and RJ**  
 
-6 - 101     MIC-151 MIC-229 (Am Soa, Woleai, Olimareo)
-13 - 19-rep2 226     230     259 (Al Lith, Inner Fsar, Maggie Is)
-18 - 229     237     256     MIC-220 MIC-226 (Al Lith, Inner Fasr, Olimareo)
+**7** - 52-2  MIC-85-rep2 RS13 **Ningaloo 1, Woleai, RK**  
+**10** - 75-2 76-2 77-2 **all Ningaloo site 4, normal looking Stylophora**  
+**11** - 11 49-2 50-2 51-2 53-2 57-2 63-2 64-2 65-2 **Ningaloo sites 1-3, normal looking Stylophora**  
 
-17 - 251    254    MIC-25 (Al Fahal, Yap, normal looking Stylophora)
-20 - 209 257 258 (Yanbu, Inner Fsar, contains some skinny fingered Stylophora)
-23 - 176 206 231 243 244 (Yanbu, Al Lith, Al Fahal, almost entirely skinny fingered Stylophora!)
-31 - 208     227     260     MIC-453 (Yanbu, Al Lith, Innser Fsar, Nakuoro, fatter fingers)
-```
+**6** - 101     MIC-151 MIC-229 **Am Soa, Woleai, Olimareo**  
+**13** - 19-rep2 226     230     259 **Al Lith, Inner Fsar, Maggie Is**  
+**18** - 229     237     256     MIC-220 MIC-226 **Al Lith, Inner Fasr, Olimareo**  
+
+**17** - 251    254    MIC-25 **Al Fahal, Yap, normal looking Stylophora**  
+**20** - 209 257 258 **Yanbu, Inner Fsar, contains some skinny fingered Stylophora**  
+**23** - 176 206 231 243 244 **Yanbu, Al Lith, Al Fahal, almost entirely skinny fingered Stylophora!**  
+**31** - 208     227     260     MIC-453 **Yanbu, Al Lith, Innser Fsar, Nakuoro, fatter fingers**  
 
 Looks like we have two types of separation going on here - site and by Stylophora morphology! Pretty cool. 
 
