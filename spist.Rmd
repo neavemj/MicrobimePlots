@@ -256,6 +256,8 @@ factorsSIMP <- spistDistSIMP[,4812:4816]
 spistSIMP <- simper(OTUsSIMP, factorsSIMP$site)
 ```
 
+Lots of OTUs coming up here - plenty of Endozoicomonas OTUs are important in differentiating the sites. 
+
 ### Correlations between chemical data and microbes
 
 Import nutrient and FCM data and look at Spearman correlations between this data and the sample ordinations
@@ -377,7 +379,7 @@ mothurNMDSmetaSIMP[mothurNMDSmetaSIMP$simprofCLUSTER==6,"group.x"]
 
 **Clusters**  
 **3** - 103  RS12 RS15 RS16 RS17 RS18 **Rita's sites RW and RK**  
-**5** - RS1 RS2 RS3 RS5 RS6 RS7 **Ritas sites RA and RJ**  
+**5** - RS1 RS2 RS3 RS5 RS6 RS7 **Rita's sites RA and RJ**  
 
 **7** - 52-2  MIC-85-rep2 RS13 **Ningaloo 1, Woleai, RK**  
 **10** - 75-2 76-2 77-2 **all Ningaloo site 4, normal looking Stylophora**  
@@ -394,5 +396,5 @@ mothurNMDSmetaSIMP[mothurNMDSmetaSIMP$simprofCLUSTER==6,"group.x"]
 
 Looks like we have two types of separation going on here - site and by Stylophora morphology! Pretty cool. 
 
-The Indonesian and Ningaloo samples form nice tight clusters based on site. The Red Sea samples don't cluster by site, but they seem to form clusters based on morphology. Ie. cluster 23 contains almost entirly skinnyer fingered Stylohpora.. neat. 
+The Indonesian and Ningaloo samples form nice tight clusters based on site. The Red Sea samples don't cluster by site, but they seem to form clusters based on morphology. Ie. cluster 23 contains almost entirly skinnyer fingered Stylophora.. neat. 
 
