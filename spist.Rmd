@@ -249,7 +249,6 @@ spistSharedSIMP = read.table('micro.spist.0.03.shared', header=TRUE)
 rownames(spistSharedSIMP) <- spistSharedSIMP[,2]
 spistSharedSIMP = spistSharedSIMP[,4:4813]
 spistDistSIMP <- merge(spistSharedSIMP, metaFile, by="row.names")
-spistDistSIMP[,4810:4812]
 rownames(spistDistSIMP) <- spistDistSIMP[,1]
 OTUsSIMP <- spistDistSIMP[,2:4811]
 factorsSIMP <- spistDistSIMP[,4812:4816]
@@ -309,7 +308,9 @@ For the FCM results, the Red Sea had more Synechococcus and less Prochlorococcus
 
 ### SIMPROF analysis to check which samples fall into 'groups' without any a priori assumptions
 
-Need to import just the shared file containing just spist OTUs
+Need to import the shared file containing just spist OTUs, then calcualte the simprof clusters based on the braycurtis metric. 
+
+After calculating the clusters, make a data frame of the results and add to previous nMDS plot.
 
 ```{r}
 spistShared = read.table('micro.spist.0.03.shared')
@@ -329,7 +330,7 @@ simprof.plot(spistSIMPROF, leafcolors=NA, plot=TRUE, fill=TRUE, leaflab="perpend
 simprofCLUSTERS = data.frame()
 
 for(j in 1:length(spistSIMPROF$significantclusters)){
-  if(length(spistSIMPROF$significantclusters[[j]]) > 4){
+  if(length(spistSIMPROF$significantclusters[[j]]) > 2){
     simprofCLUSTERS <- rbind(simprofCLUSTERS, cbind(j, spistSIMPROF$significantclusters[[j]]))
   }
 }
@@ -345,17 +346,43 @@ for(g in levels(mothurNMDSmetaSIMP$simprofCLUSTER)){
   df_ell <- rbind(df_ell, cbind(as.data.frame(with(mothurNMDSmetaSIMP[mothurNMDSmetaSIMP$simprofCLUSTER==g,], ellipse(cor(axis2, axis3), scale=c(sd(axis2), sd(axis3)), centre=c(mean(axis2), mean(axis3))))),site=g))
 }
 
-ggplot(data=mothurNMDSmeta, aes(x=axis2, y=axis3, color=site)) +
-  geom_point(size=1.5, alpha=0.6) +
-  geom_path(data=df_ell, aes(x=x, y=y, color=site), size=1, linetype=1)
 
+nMDSsimprof <- ggplot(data=mothurNMDSmeta, aes(x=axis2, y=axis3, color=site)) +
+  geom_point(size=3, alpha=0.6) +
+  scale_color_hue(limits=levels(droplevels(mothurNMDSmeta$site)))
+nMDSsimprof
+
+nMDS.mean <- aggregate(df_ell, list(df_ell$site), FUN=mean)
+
+nMDSsimprof +
+  geom_path(data=df_ell, aes(x=x, y=y, color=site), size=1, linetype=2, show_guide=FALSE) +
+  annotate("text", x=nMDS.mean$x, y=nMDS.mean$y, label=nMDS.mean$Group.1)
+  
 ```
 
-euclidean and 'squareroot' had 21 groups, many with just a single sample
-euclidean and 'identity' (no transformation) had 12 groups, 
-braycurtis, 'identity', had 37 and some bigger groups
-braycurtis, 'squareroot', had 43 clusters and not many bigger groups..
+Check which samples are in the clusters.
 
+```{r, eval=FALSE}
+#mothurNMDSmetaSIMP[mothurNMDSmetaSIMP$simprofCLUSTER==6,"group.x"]
 
+3 - 103  RS12 RS15 RS16 RS17 RS18 (Rita's sites RW and RK)
+5 - RS1 RS2 RS3 RS5 RS6 RS7 (Ritas sites RA and RJ)
 
+7 - 52-2  MIC-85-rep2 RS13 (Ningaloo 1, Woleai, RK)
+10 - 75-2 76-2 77-2 (all Ningaloo site 4, normal looking Stylophora)
+11 - 11 49-2 50-2 51-2 53-2 57-2 63-2 64-2 65-2 (Ningaloo sites 1-3, normal looking Stylophora)
+
+6 - 101     MIC-151 MIC-229 (Am Soa, Woleai, Olimareo)
+13 - 19-rep2 226     230     259 (Al Lith, Inner Fsar, Maggie Is)
+18 - 229     237     256     MIC-220 MIC-226 (Al Lith, Inner Fasr, Olimareo)
+
+17 - 251    254    MIC-25 (Al Fahal, Yap, normal looking Stylophora)
+20 - 209 257 258 (Yanbu, Inner Fsar, contains some skinny fingered Stylophora)
+23 - 176 206 231 243 244 (Yanbu, Al Lith, Al Fahal, almost entirely skinny fingered Stylophora!)
+31 - 208     227     260     MIC-453 (Yanbu, Al Lith, Innser Fsar, Nakuoro, fatter fingers)
+```
+
+Looks like we have two types of separation going on here - site and by Stylophora morphology! Pretty cool. 
+
+The Indonesian and Ningaloo samples form nice tight clusters based on site. The Red Sea samples don't cluster by site, but they seem to form clusters based on morphology. Ie. cluster 23 contains almost entirly skinnyer fingered Stylohpora.. neat. 
 
