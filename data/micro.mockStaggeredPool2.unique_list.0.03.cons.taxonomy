@@ -1,4 +1,4 @@
-OTU	Size	Taxonomy
+OTU     Size    Domain  Phylum  Class   Order   Family  Genus   Species
 Otu001	4330	Bacteria(100)	Firmicutes(100)	Bacilli(100)	Bacillales(100)	Staphylococcaceae(100)	Staphylococcus(100)	
 Otu002	3447	Bacteria(100)	Firmicutes(100)	Bacilli(100)	Lactobacillales(100)	Streptococcaceae(100)	Streptococcus(100)	
 Otu003	2883	Bacteria(100)	Proteobacteria(100)	Gammaproteobacteria(100)	Enterobacteriales(100)	Enterobacteriaceae(100)	Escherichia-Shigella(100)	
