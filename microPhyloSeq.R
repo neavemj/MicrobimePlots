@@ -3,9 +3,6 @@
 
 # install requirements
 
-source("http://bioconductor.org/biocLite.R")
-biocLite("phyloseq")
-
 
 source("http://bioconductor.org/biocLite.R")
 biocLite("phyloseq")

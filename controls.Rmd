@@ -48,10 +48,11 @@ class(sharedsubFile) <- "numeric"
 Import taxonomy file from mothur
 
 ```{r}
-taxFile = read.table('micro.final.0.03.cons.taxonomy', header=T, sep='\t')
+taxFile = as.data.frame(read.table('micro.final.0.03.cons.taxonomy', header=T, sep='\t'))
 rownames(taxFile) = taxFile[,1]
-taxFile = taxFile[,2:8]
+taxFile = taxFile[,3:9]
 taxFile = as.matrix(taxFile)
+
 ```
 
 Import metadata - ie. site, type, etc..
@@ -96,9 +97,8 @@ microSubRelFiltSea <- subset_samples(microSubRelFilt, species=='seawater')
 Look at observed OTUs, predicted OTUs (chao1) and then the shannon diversity index.
 
 ```{r, fig.width = 8}
-plot_richness(physeq)
-microRich <- plot_richness(physeq, aes(x=factor(species)), color = 'site')
-microRich
+microRich = plot_richness(physeq, x = 'species', measures = c('Chao1', 'Shannon', 'observed'), color = 'site')
+microRich + geom_boxplot(data = microRich$data, aes(x = species, y = value, color = NULL), alpha = 0.1)
 ```
 
 Seawater is quite a bit higher and makes the coral results a bit hard to see - drop seawater and repeat
