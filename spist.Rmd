@@ -20,7 +20,7 @@ library("clustsig")
 library("ellipse")
 setwd("./data")
 opts_knit$set(root.dir = "./data", fig.keep='high')
-opts_chunk$set(dev = 'pdf', fig.path="figures/spist/")
+#opts_chunk$set(dev = 'pdf', fig.path="figures/spist/")
 ```
 
 ### Import data into R studio
@@ -132,13 +132,19 @@ spistBarEndo + facet_wrap(~site, scales='free')
 
 Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites! Note the change in y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
 
-The Red Sea has the most samples and is a bit hard to see at this scale - I'll take a closer look at these reefs. We also collected some different Stylophora morphology types from the Red Sea reefs - one fatter fingered, reef-flat variatey and a thinner fingered, deeper variety. I decided to also facet out these morpho-types.
+The Red Sea has the most samples and is a bit hard to see at this scale - I'll take a closer look at these reefs. 
 
 ```{r, fig.width= 10, fig.height = 8}
 microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
 microSubRelFiltSpistFiltRedSea <- subset_samples(microSubRelFiltSpistFilt, site=="RedSea")
 spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, aes(x=factor(Sample)), fill="Genus", title='Stylophora pistillata in the Red Sea')
 spistRedSea + facet_wrap(~reef, scales="free_x")
+```
+
+We also collected some different Stylophora morphology types from the Red Sea reefs - one fatter fingered, reef-flat variatey and a thinner fingered, deeper variety. I decided to also facet out these morpho-types.
+
+```{r, fig.width = 10}
+
 spistRedSea + facet_wrap(~morphology, scales="free_x")
 spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, aes(x=factor(Sample)), fill="Order", title='Stylophora pistillata in the Red Sea')
 spistRedSea + facet_wrap(~morphology, scales="free_x")
@@ -153,7 +159,7 @@ I guess the microbiome differences could be related to the different morphotype 
 
 Which distance measure to use?
 
-```{r, fig.width = 10, fig.height = 10, warning=FALSE}
+```{r, fig.width = 12, fig.height = 10, warning=FALSE}
 dist_methods <- unlist(distance("list"))
 dist_methods <- dist_methods[-(1:2)]
 dist_methods <- dist_methods[-which(dist_methods == "ANY")]
