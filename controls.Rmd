@@ -283,7 +283,7 @@ barMockPlot <- ggplot(data=stgP1) +
   geom_bar(aes(x=Genus, y=relAbund), stat="identity", fill='#66CC99') +
   geom_point(data=hmpStaggered, aes(x=Genus, y=ExpRelAbund, color='expected'), stat='identity') +
   scale_color_manual(values=c("expected"="blue")) +
-  theme(axis.text.x=element_text(angle=90), legend.title=element_blank()) +
+  theme(axis.text.x=element_text(angle=90, hjust = 1), legend.title=element_blank()) +
   ggtitle('Staggered Mock Pool1')
 barMockPlot
 ```
@@ -319,7 +319,7 @@ barMockPlot <- ggplot(data=stgP2) +
   geom_bar(aes(x=Genus, y=relAbund), stat="identity", fill='#66CC99') +
   geom_point(data=hmpStaggered, aes(x=Genus, y=ExpRelAbund, color='expected'), stat='identity') +
   scale_color_manual(values=c("expected"="blue")) +
-  theme(axis.text.x=element_text(angle=90), legend.title=element_blank()) +
+  theme(axis.text.x=element_text(angle=90, hjust = 1), legend.title=element_blank()) +
   ggtitle('Staggered Mock Pool2')
 barMockPlot
 ```
