@@ -132,7 +132,7 @@ spistBarEndo + facet_wrap(~site, scales='free')
 
 Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites! Note the change in y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
 
-The Red Sea has the most samples and is a bit hard to see at this scale - I'll take a closer look at these reefs.
+The Red Sea has the most samples and is a bit hard to see at this scale - I'll take a closer look at these reefs. We also collected some different Stylophora morphology types from the Red Sea reefs - one fatter fingered, reef-flat variatey and a thinner fingered, deeper variety. I decided to also facet out these morpho-types.
 
 ```{r, fig.width= 10, fig.height = 8}
 microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x) > 1e-2, TRUE)
@@ -140,9 +140,14 @@ microSubRelFiltSpistFiltRedSea <- subset_samples(microSubRelFiltSpistFilt, site=
 spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, aes(x=factor(Sample)), fill="Genus", title='Stylophora pistillata in the Red Sea')
 spistRedSea + facet_wrap(~reef, scales="free_x")
 spistRedSea + facet_wrap(~morphology, scales="free_x")
+spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, aes(x=factor(Sample)), fill="Order", title='Stylophora pistillata in the Red Sea')
+spistRedSea + facet_wrap(~morphology, scales="free_x")
 ```
 
-Endozoicomonas are fairly abundant throughout all sites, though this is variable. 
+Quite cool! Looks like we definately have microbiome differences in the different Stylophora morphologies. The thicker shallower type seems to be more dominated by Endozoicomonas - this was also the type I used for the metagenome studies.  
+
+I guess the microbiome differences could be related to the different morphotype or it could just be related to depth? 
+
 
 ### Ordination of Stylophora pistillata samples
 
