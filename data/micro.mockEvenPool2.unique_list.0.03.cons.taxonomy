@@ -1,4 +1,4 @@
-OTU     Size    Domain  Phylum  Class   Order   Family  Genus   Species
+OTU	Size	Domain	Phylum	Class	Order	Family	Genus	Species
 Otu001	1890	Bacteria(100)	Firmicutes(100)	Bacilli(100)	Bacillales(100)	Staphylococcaceae(100)	Staphylococcus(100)	
 Otu002	1204	Bacteria(100)	Deinococcus-Thermus(100)	Deinococci(100)	Deinococcales(100)	Deinococcaceae(100)	Deinococcus(100)	
 Otu003	1083	Bacteria(100)	Bacteroidetes(100)	Bacteroidia(100)	Bacteroidales(100)	Bacteroidaceae(100)	Bacteroides(100)	

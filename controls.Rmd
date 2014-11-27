@@ -7,7 +7,7 @@ output: html_document
 
 ### Load required libraries
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE, warning=FALSE}
 library("phyloseq")
 library("ggplot2")
 library("plyr")
@@ -52,7 +52,6 @@ taxFile = as.data.frame(read.table('micro.final.0.03.cons.taxonomy', header=T, s
 rownames(taxFile) = taxFile[,1]
 taxFile = taxFile[,3:9]
 taxFile = as.matrix(taxFile)
-
 ```
 
 Import metadata - ie. site, type, etc..
@@ -97,8 +96,7 @@ microSubRelFiltSea <- subset_samples(microSubRelFilt, species=='seawater')
 Look at observed OTUs, predicted OTUs (chao1) and then the shannon diversity index.
 
 ```{r, fig.width = 8}
-microRich = plot_richness(physeq, x = 'species', measures = c('Chao1', 'Shannon', 'observed'), color = 'site')
-microRich + geom_boxplot(data = microRich$data, aes(x = species, y = value, color = NULL), alpha = 0.1)
+plot_richness(physeq, x = 'species', measures = c('Chao1', 'Shannon', 'observed'), color = 'site')
 ```
 
 Seawater is quite a bit higher and makes the coral results a bit hard to see - drop seawater and repeat
@@ -274,7 +272,8 @@ stgP1$type <- rep('observed', 29)
 
 # add expected stagger
 
-hmpStaggered = read.table('HMP_staggeredEdit.txt', sep='\t', header=T)
+hmpStaggered = read.table('HMP_staggered.txt', sep='\t', header=F)
+colnames(hmpStaggered) <- c("Genus", "expAbund")
 hmpStaggered$ExpRelAbund = hmpStaggered$expAbund / sum(hmpStaggered$expAbund)
 hmpStaggered$type = rep("expected", 21)
 hmpStaggered$otu <- rownames(hmpStaggered)
@@ -315,12 +314,6 @@ stgP2$otuNumber <- factor(stgP2$otuNumber, levels=stgP2$otuNumber, ordered=TRUE)
 stgP2$type <- rep('observed', 29)
 
 # add expected stagger
-
-hmpStaggered = read.table('HMP_staggeredEdit.txt', sep='\t', header=T)
-hmpStaggered$ExpRelAbund = hmpStaggered$expAbund / sum(hmpStaggered$expAbund)
-hmpStaggered$type = rep("expected", 21)
-hmpStaggered$otu <- rownames(hmpStaggered)
-hmpStaggered$otu <- factor(hmpStaggered$otu, levels=hmpStaggered$otu, ordered=TRUE)
 
 barMockPlot <- ggplot(data=stgP2) + 
   geom_bar(aes(x=Genus, y=relAbund), stat="identity", fill='#66CC99') +
