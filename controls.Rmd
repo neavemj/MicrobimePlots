@@ -16,7 +16,8 @@ library("grid")
 library("directlabels")
 library("knitr")
 setwd("./data")
-opts_knit$set(root.dir = "./data")
+opts_knit$set(root.dir = "./data", fig.keep='high')
+opts_chunk$set(dev = 'pdf', fig.path="figures/controls/")
 ```
 
 ### Import data into R studio
