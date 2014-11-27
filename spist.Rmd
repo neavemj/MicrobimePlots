@@ -2,7 +2,7 @@
 title: "Global STP Analysis - Stylophora pistillata"
 author: "Matt"
 date: "November 16, 2014"
-output: beamer_presentation
+output: html_document
 ---
 
 ### Load required libraries
@@ -63,7 +63,7 @@ Import metadata - ie. site, type, etc..
 ```{r}
 metaFile = read.table('pools.metaData2', header=T, sep='\t')
 rownames(metaFile) = metaFile[,1]
-metaFile = metaFile[,2:6]
+metaFile = metaFile[,2:7]
 ```
 
 ### Create phyloseq object
@@ -139,6 +139,7 @@ microSubRelFiltSpistFilt = filter_taxa(microSubRelFiltSpist, function(x) mean(x)
 microSubRelFiltSpistFiltRedSea <- subset_samples(microSubRelFiltSpistFilt, site=="RedSea")
 spistRedSea <- plot_bar(microSubRelFiltSpistFiltRedSea, aes(x=factor(Sample)), fill="Genus", title='Stylophora pistillata in the Red Sea')
 spistRedSea + facet_wrap(~reef, scales="free_x")
+spistRedSea + facet_wrap(~morphology, scales="free_x")
 ```
 
 Endozoicomonas are fairly abundant throughout all sites, though this is variable. 
