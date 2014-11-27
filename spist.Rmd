@@ -414,54 +414,54 @@ spistSIMP <- simper(OTUsSIMP, factorsSIMP$simprof1)
 
 taxFile["Otu000027", "Genus"]
 
-`3_5`
+Cluster 3_5
 Phyllobacterium(100) Vibrio(100) unclassified(100) Endozoicomonas(100)
 Otu000018 Otu000006  Otu000066  Otu000015  
 0.3425523 0.4223809  0.4900698  0.5349922  
 
-`11_7`
+Cluster 11_7
 unclassified(100) Pseudomonas(100) Endozoicomonas(100) unclassified(79)
 Otu000027 Otu000005 Otu000007 Otu000046  
 0.2156589 0.3991708 0.4846407 0.5075199 
 
-$`11_10`
+Cluster 11_10
 Endozoicomonas(100) Pseudomonas(100) Endozoicomonas(100) Endozoicomonas(100) unclassified(79)
 Otu000001 Otu000005 Otu000007 Otu000044 Otu000027
 0.1885475 0.3257681 0.4190131 0.4733229 0.5257603  
  
-$`23_31`
+Cluster 23_31
 Endozoicomonas(100) unclassified(79)
 Otu000001 Otu000012  
 0.3697467 0.6114984 
 
-$`23_20`
+Cluster 23_20
 unclassified(100) Psychrobacter(100) unclassified(100) Erythrobacter(100) Prochlorococcus(92) Endozoicomonas(100) Endozoicomonas(100)   
 Otu000012 Otu000035 Otu000045 Otu000019 Otu000003 Otu000001 Otu000015 
 0.2390968 0.3285189 0.3898128 0.4215555 0.4506654 0.4793538 0.5045665 
 
-$`23_17`
+Cluster 23_17
 unclassified(100) Endozoicomonas(100) Prochlorococcus(92) unclassified(100) Endozoicomonas(100) unclassified(95) unclassified(100) unclassified(100) Halomonas(100)
 Otu000012 Otu000001 Otu000003 Otu000025 Otu000015 Otu000014 Otu000031 Otu000045 Otu000021 
 0.2254655 0.2643262 0.2917820 0.3189994 0.3448192 0.3691433 0.3906022 0.4047181 0.4177589 
 
-$`31_20`
+Cluster 31_20
 Endozoicomonas(100) Psychrobacter(100) unclassified(100)
 Otu000001 Otu000035 Otu000045 
 0.3751966 0.4618428 0.5321333  
 
-$`31_10`
+Cluster 31_10
 Endozoicomonas(100) Endozoicomonas(100) Pseudomonas(100)
 Otu000001 Otu000007 Otu000005 
 0.3238094 0.4781600 0.6161271 
 
-$`20_17`
+Cluster 20_17
  Otu000035  Otu000045  Otu000019  Otu000025  Otu000453  Otu000014  Otu000020  Otu000010 
 0.08570892 0.15793183 0.18798164 0.21446025 0.23753211 0.25910031 0.27853831 0.29587745 
  Otu000001  Otu000004  Otu000197  Otu000015  Otu000170  Otu000104  Otu000146  Otu000100 
 0.31129002 0.32483084 0.33631978 0.34677495 0.35685421 0.36632260 0.37562653 0.38478949 
  Otu000293  Otu000092  Otu000818  Otu000849  Otu000054  Otu000042  Otu000320  Otu000488 
  
-$`7_5`
+Cluster 7_5
 Phyllobacterium(100) unclassified(100)
 Otu000018 Otu000027 
 0.3242466 0.5269505  
