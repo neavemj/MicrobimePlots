@@ -122,7 +122,7 @@ spistBar <- plot_bar(microSubRelFiltSpistFilt, fill="Genus", title='Stylophora p
 spistBar + facet_wrap(~site, scales='free')
 ```
 
-Quite some variability in the microbial composition across the sites. Can see Endozoicomonas throughout the graph, though it's a little difficult to see. I'll redo the graph with just endozoicomonas OTUs.
+Quite some variability in the microbial composition across the sites. Can see Endozoicomonas throughout the graph, athough it's a little difficult to see. I'll redo the graph with just endozoicomonas OTUs.
 
 ```{r, fig.width = 10, fig.height = 6}
 microSubRelFiltSpistEndo = subset_taxa(microSubRelFiltSpist, Genus=='Endozoicomonas(100)')
