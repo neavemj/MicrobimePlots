@@ -230,12 +230,35 @@ physeqP1 = plot_ordination(physeqSub, physeqSubOrd, type = "samples", color = "s
 print(physeqP1)
 physeqP1 + geom_polygon(aes(fill = site)) + geom_point(size = 4) + ggtitle("samples")
 
+# rank abundance curve
+
+spistShared = read.table('micro.spist.0.03.shared')
+spistShared = t(spistShared)
+rownames(spistShared) = spistShared[,1]
+colnames(spistShared) = spistShared[2,]
+spistShared = spistShared[,2:81]
+spistShared = spistShared[4:4813,]
+class(spistShared) <- "numeric"
+
+plot(log(x=(rowSums(spistShared))))
+
+rAbund = read.table('micro.final.unique_list.rabund', fill=TRUE)
+rAbund = t(rAbund)
+colnames(rAbund) = rAbund[1,]
+rAbund = rAbund[-1,]
+rAbund = as.data.frame(rAbund)
+
+rAbundOmit <- na.omit(rAbund)
+colnames(rAbundOmit) <- c("unique","one","two","three","four","five")
+rAbundOmit$rank <- rownames(rAbundOmit)
+class(rAbundOmit$three) <- 'numeric'
+
+ggplot(data=rAbundOmit) +
+  geom_point(aes(x=rownames(rAbundOmit), y=three), na.rm=TRUE)
+
+colnames(rAbund)
 
 
-
-
-
-
-
+plot(x=(as.numeric(rAbundOmit[,"three"])))
 
 
