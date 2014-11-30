@@ -232,33 +232,21 @@ physeqP1 + geom_polygon(aes(fill = site)) + geom_point(size = 4) + ggtitle("samp
 
 # rank abundance curve
 
-spistShared = read.table('micro.spist.0.03.shared')
-spistShared = t(spistShared)
-rownames(spistShared) = spistShared[,1]
-colnames(spistShared) = spistShared[2,]
-spistShared = spistShared[,2:81]
-spistShared = spistShared[4:4813,]
-class(spistShared) <- "numeric"
+spistShared = read.table('micro.spist.0.03.shared', header=TRUE, stringsAsFactors=FALSE)
 
-plot(log(x=(rowSums(spistShared))))
+rownames(spistShared) = spistShared[,2]
+spistShared = spistShared[,4:4813]
 
-rAbund = read.table('micro.final.unique_list.rabund', fill=TRUE)
-rAbund = t(rAbund)
-colnames(rAbund) = rAbund[1,]
-rAbund = rAbund[-1,]
-rAbund = as.data.frame(rAbund)
+plot(x=(sort(colSums(spistShared), decreasing=TRUE)), log='y')
 
-rAbundOmit <- na.omit(rAbund)
-colnames(rAbundOmit) <- c("unique","one","two","three","four","five")
-rAbundOmit$rank <- rownames(rAbundOmit)
-class(rAbundOmit$three) <- 'numeric'
-
-ggplot(data=rAbundOmit) +
-  geom_point(aes(x=rownames(rAbundOmit), y=three), na.rm=TRUE)
-
-colnames(rAbund)
+head(log(sort(colSums(spistShared), decreasing=TRUE)))
 
 
-plot(x=(as.numeric(rAbundOmit[,"three"])))
+ggplot() +
+  geom_point(aes(x=colnames(spistShared), y=sort(colSums(spistShared), decreasing=TRUE))) +
+  scale_y_log10(labels = comma) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) 
+
+library("scales")
 
 
