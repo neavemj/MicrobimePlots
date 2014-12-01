@@ -20,7 +20,7 @@ library("clustsig")
 library("ellipse")
 setwd("./data")
 opts_knit$set(root.dir = "./data", fig.keep='high')
-#opts_chunk$set(dev = 'pdf', fig.path="figures/spist/")
+opts_chunk$set(dev = 'pdf', fig.path="figures/spist/")
 ```
 
 ### Import data into R studio
@@ -241,7 +241,7 @@ arrowmatrix = top10spearman
 arrowdf <- data.frame(labels = rownames(arrowmatrix), arrowmatrix)
 
 # get taxonomic information from the original tax file
-taxFile[rownames(arrowmatrix),"Genus"]
+
 arrowdf <- data.frame(labels = taxFile[rownames(arrowmatrix),"Genus"], arrowmatrix)
 
 arrowmap <- aes(xend = axis2, yend = axis3, x = 0, y = 0, alpha=0.5, shape = NULL, color = NULL, label = labels)
@@ -251,6 +251,9 @@ mothurNMDSplot <- ggplot(mothurNMDSmeta) +
   geom_point(aes(x=axis2, y=axis3, color=site))
 mothurNMDSplotArrow <- mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead, show_guide = FALSE) + geom_text(labelmap, size = 3, data = arrowdf)
 mothurNMDSplotArrow 
+
+arrowdf <- data.frame(labels = taxFile[rownames(arrowmatrix),"Family"], arrowmatrix)
+mothurNMDSplot + geom_segment(arrowmap, size = 0.5, data = arrowdf, color = "black",  arrow = arrowhead, show_guide = FALSE) + geom_text(labelmap, size = 3, data = arrowdf)
 ```
 
 This result reflects nicely what was in the barplots. Looks like the Ningaloo corals have a different Endozoicomonas OTU than the Red Sea reefs which is highly correlated with the samples. I'll look deeper into different Endozoicomonas types (oligotypes) across sites later. 
