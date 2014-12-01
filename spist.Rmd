@@ -128,9 +128,25 @@ Quite some variability in the microbial composition across the sites. Can see En
 microSubRelFiltSpistEndo = subset_taxa(microSubRelFiltSpist, Genus=='Endozoicomonas(100)')
 spistBarEndo <- plot_bar(microSubRelFiltSpistEndo, fill="Genus", title='Stylophora pistillata')
 spistBarEndo + facet_wrap(~site, scales='free')
+
+# add coloring for different Endozoicomonas OTUs
+tax_table(microSubRelFiltSpistEndo) <- cbind(tax_table(microSubRelFiltSpistEndo), Strain=taxa_names(microSubRelFiltSpistEndo))
+myranks = c("Genus", "Strain")
+mylabels = apply(tax_table(microSubRelFiltSpistEndo)[, myranks], 1, paste, sep="", collapse="_")
+tax_table(microSubRelFiltSpistEndo) <- cbind(tax_table(microSubRelFiltSpistEndo), catglab=mylabels)
+microSubRelFiltSpistEndoFilt = filter_taxa(microSubRelFiltSpistEndo, function(x) mean(x) > 1e-2, TRUE)
+plot_bar(microSubRelFiltSpistEndoFilt, fill="catglab", title='Stylophora pistillata') +
+  facet_wrap(~site, scales='free')
+
+microSubRelFiltSpistEndoFilt = filter_taxa(microSubRelFiltSpistEndo, function(x) mean(x) > 1e-4, TRUE)
+plot_bar(microSubRelFiltSpistEndoFilt, fill="catglab", title='Stylophora pistillata') +
+  facet_wrap(~site, scales='free')
+
 ```
 
-Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites! Note the change in y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
+Again quite a bit of variability between and within sites but can see Endozoicomonas at all the sites! Also very cool that many of the sites have their 'own' Endozoicomonas. Otu7 is only in Australia, while Otu15 is mostly in Indonesia but also pops up in the Red Sea, which might make sense.. Then the main Otu1 appears to dominate the pacific and Red Sea. 
+
+Note the change in y-axis numbers (relative abundance) across the different sites - at the American Samoan sites this number is very small. 
 
 The Red Sea has the most samples and is a bit hard to see at this scale - I'll take a closer look at these reefs. 
 
