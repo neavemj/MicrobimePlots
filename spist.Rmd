@@ -370,7 +370,7 @@ for(g in levels(mothurNMDSmetaSIMP$simprofCLUSTER)){
 }
 
 nMDSsimprof <- ggplot(data=mothurNMDSmeta, aes(x=axis2, y=axis3, color=site)) +
-  geom_point(size=2, alpha=0.6) +
+  geom_point() +
   scale_color_hue(limits=levels(droplevels(mothurNMDSmeta$site)))
 nMDSsimprof
 
@@ -431,7 +431,7 @@ spistSIMP <- simper(OTUsSIMP, factorsSIMP$simprof1)
 ```
 
 
-taxFile["Otu000027", "Genus"]
+taxFile["Otu000066", "Family"]
 
 Cluster 3_5
 Phyllobacterium(100) Vibrio(100) unclassified(100) Endozoicomonas(100)

@@ -15,7 +15,15 @@ library("vegan")
 library("grid")
 library("directlabels")
 library("knitr")
-opts_knit$set(root.dir = "~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/")
+setwd("./data")
+opts_knit$set(root.dir = "./data", fig.keep='high')
+opts_chunk$set(dev = 'pdf', fig.path="figures/sea/")
+```
+
+### Extract out seawater samples
+
+```{r}
+microSubRelFiltSea <- subset_samples(microSubRelFilt, species=='seawater')
 ```
 
 # Relative abundance of seawater otus bar plot
@@ -27,5 +35,34 @@ seaBar + facet_wrap(~site, scales="free")
 ```
 
 Mostly dominated by Synechococccus and other typical seawater bacteria. Note the difference for Ningaloo - these were the samples that got warm! Seems this caused the community to change toward Alteromonas / Vibrio. 
+
+# Check which Endozoicomonas OTUs are in the seawater
+
+```{r}
+microSubRelFiltSeaEndo = subset_taxa(microSubRelFiltSea, Genus=='Endozoicomonas(100)')
+seaBarEndo <- plot_bar(microSubRelFiltSeaEndo, fill="Genus", title='Stylophora pistillata')
+seaBarEndo + facet_wrap(~site, scales='free')
+
+# add coloring for different Endozoicomonas OTUs
+tax_table(microSubRelFiltSeaEndo) <- cbind(tax_table(microSubRelFiltSeaEndo), Strain=taxa_names(microSubRelFiltSeaEndo))
+myranks = c("Genus", "Strain")
+mylabels = apply(tax_table(microSubRelFiltSeaEndo)[, myranks], 1, paste, sep="", collapse="_")
+tax_table(microSubRelFiltSeaEndo) <- cbind(tax_table(microSubRelFiltSeaEndo), catglab=mylabels)
+
+microSubRelFiltSeaEndoFilt = filter_taxa(microSubRelFiltSeaEndo, function(x) mean(x) > 1e-4, TRUE)
+
+plot_bar(microSubRelFiltSeaEndoFilt, fill="catglab", title='seawater') +
+  facet_wrap(~site, scales='free')
+
+
+
+
+microSubRelFiltSpistEndoFilt = filter_taxa(microSubRelFiltSpistEndo, function(x) mean(x) > 1e-4, TRUE)
+plot_bar(microSubRelFiltSpistEndoFilt, fill="catglab", title='Stylophora pistillata') +
+  facet_wrap(~site, scales='free')
+```
+
+
+
 
 
