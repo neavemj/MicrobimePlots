@@ -2,7 +2,7 @@
 title: "Global STP Analysis - controls"
 author: "Matt"
 date: "November 12, 2014"
-output: html_document
+output: pdf_document
 ---
 
 ### Load required libraries
@@ -17,7 +17,7 @@ library("directlabels")
 library("knitr")
 setwd("./data")
 opts_knit$set(root.dir = "./data", fig.keep='high')
-opts_chunk$set(dev = 'pdf', fig.path="figures/controls/")
+#opts_chunk$set(dev = 'pdf', fig.path="figures/controls/")
 ```
 
 ### Import data into R studio

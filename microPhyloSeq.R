@@ -111,7 +111,20 @@ microSubRelFiltSea <- subset_samples(microSubRelFilt, species=='seawater')
 sitesMerged = merge_samples(physeq, "site")
 speciesMerged = merge_samples(physeq, "species")
 
-plot_bar(physeq, x="reef", fill="Family")
+# see if same endos across species / sites
+
+microCorals = merge_phyloseq(microSubRelFiltSpist, microSubRelFiltPverr, microSubRelFiltPdami)
+microCoralsEndos = subset_taxa(microCorals, Genus=='Endozoicomonas(100)')
+
+tax_table(microCoralsEndos) <- cbind(tax_table(microCoralsEndos), Strain=taxa_names(microCoralsEndos))
+myranks = c("Genus", "Strain")
+mylabels = apply(tax_table(microCoralsEndos)[, myranks], 1, paste, sep="", collapse="_")
+tax_table(microCoralsEndos) <- cbind(tax_table(microCoralsEndos), catglab=mylabels)
+
+microCoralsEndosFilt = filter_taxa(microCoralsEndos, function(x) mean(x) > 1e-5, TRUE)
+
+plot_bar(microCoralsEndosFilt, fill="catglab") +
+  facet_wrap(~species + site, scales='free')
 
 # try top 50 OTUs in spist
 
