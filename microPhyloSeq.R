@@ -262,4 +262,8 @@ ggplot() +
 
 library("scales")
 
+microSubRelFiltCyano = subset_taxa(microSubRelFilt, Phylum=='Cyanobacteria(100)')
+BarCyano <- plot_bar(microSubRelFiltCyano, fill="Genus")
+BarCyano + facet_wrap(~site, scales='free')
+
 

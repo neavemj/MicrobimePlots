@@ -49,9 +49,9 @@ myranks = c("Genus", "Strain")
 mylabels = apply(tax_table(microSubRelFiltSeaEndo)[, myranks], 1, paste, sep="", collapse="_")
 tax_table(microSubRelFiltSeaEndo) <- cbind(tax_table(microSubRelFiltSeaEndo), catglab=mylabels)
 
-microSubRelFiltSeaEndoFilt = filter_taxa(microSubRelFiltSeaEndo, function(x) mean(x) > 1e-4, TRUE)
+microSubRelFiltSeaEndoFilt = filter_taxa(microSubRelFiltSeaEndo, function(x) mean(x) > 1e-10, TRUE)
 
-plot_bar(microSubRelFiltSeaEndoFilt, fill="catglab", title='seawater') +
+plot_bar(microSubRelFiltSeaEndo, fill="catglab", title='seawater') +
   facet_wrap(~site, scales='free')
 
 

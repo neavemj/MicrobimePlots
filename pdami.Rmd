@@ -28,3 +28,23 @@ pdamiBar + facet_wrap(~site, scales="free")
 
 Interestingly, these P.damicornis samples have less Endozoicomonas than the closely related P.verrucosa. 
 
+Take a look at the different Endozoicomonas OTUs
+
+```{r, fig.width = 10, fig.height = 6}
+microSubRelFiltPdamiFiltEndo = subset_taxa(microSubRelFiltPdamiFilt, Genus=='Endozoicomonas(100)')
+PdamiBarEndo <- plot_bar(microSubRelFiltPdamiFiltEndo, fill="Genus", title='P.verr')
+PdamiBarEndo + facet_wrap(~site, scales='free')
+
+# add coloring for different Endozoicomonas OTUs
+tax_table(microSubRelFiltPdamiFiltEndo) <- cbind(tax_table(microSubRelFiltPdamiFiltEndo), Strain=taxa_names(microSubRelFiltPdamiFiltEndo))
+myranks = c("Genus", "Strain")
+mylabels = apply(tax_table(microSubRelFiltPdamiFiltEndo)[, myranks], 1, paste, sep="", collapse="_")
+tax_table(microSubRelFiltPdamiFiltEndo) <- cbind(tax_table(microSubRelFiltPdamiFiltEndo), catglab=mylabels)
+microSubRelFiltPdamiFiltEndoFilt = filter_taxa(microSubRelFiltPdamiFiltEndo, function(x) mean(x) > 1e-2, TRUE)
+plot_bar(microSubRelFiltPdamiFiltEndo, fill="catglab", title='Pocillopora damicornis') +
+  facet_wrap(~site, scales='free')
+
+microSubRelFiltPdamiFiltEndoFilt = filter_taxa(microSubRelFiltPdamiFiltEndo, function(x) mean(x) > 1e-5, TRUE)
+plot_bar(microSubRelFiltPdamiFiltEndoFilt, fill="catglab", title='Pocillopora damicornis') +
+  facet_wrap(~site, scales='free')
+```

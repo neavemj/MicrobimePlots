@@ -15,7 +15,10 @@ library("vegan")
 library("grid")
 library("directlabels")
 library("knitr")
-opts_knit$set(root.dir = "~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/")
+library("clustsig")
+library("ellipse")
+setwd("./data")
+opts_knit$set(root.dir = "./data", fig.keep='high')
 ```
 
 # Relative abundance of Pocillopora verrucosa otus bar plot
@@ -28,3 +31,23 @@ pverrBar + facet_wrap(~site, scales="free")
 
 Lots of Endozoicomonas - maybe even more abundant than in our Stylophora pistillata samples. 
 
+Take a look at the different Endozoicomonas OTUs
+
+```{r, fig.width = 10, fig.height = 6}
+microSubRelFiltPverrFiltEndo = subset_taxa(microSubRelFiltPverrFilt, Genus=='Endozoicomonas(100)')
+pverrBarEndo <- plot_bar(microSubRelFiltPverrFiltEndo, fill="Genus", title='P.verr')
+pverrBarEndo + facet_wrap(~site, scales='free')
+
+# add coloring for different Endozoicomonas OTUs
+tax_table(microSubRelFiltPverrFiltEndo) <- cbind(tax_table(microSubRelFiltPverrFiltEndo), Strain=taxa_names(microSubRelFiltPverrFiltEndo))
+myranks = c("Genus", "Strain")
+mylabels = apply(tax_table(microSubRelFiltPverrFiltEndo)[, myranks], 1, paste, sep="", collapse="_")
+tax_table(microSubRelFiltPverrFiltEndo) <- cbind(tax_table(microSubRelFiltPverrFiltEndo), catglab=mylabels)
+microSubRelFiltPverrFiltEndoFilt = filter_taxa(microSubRelFiltPverrFiltEndo, function(x) mean(x) > 1e-2, TRUE)
+plot_bar(microSubRelFiltPverrFiltEndo, fill="catglab", title='Pocillopora verrucosa') +
+  facet_wrap(~site, scales='free')
+
+microSubRelFiltPverrFiltEndoFilt = filter_taxa(microSubRelFiltPverrFiltEndo, function(x) mean(x) > 1e-5, TRUE)
+plot_bar(microSubRelFiltPverrFiltEndoFilt, fill="catglab", title='Pocillopora verrucosa') +
+  facet_wrap(~site, scales='free')
+```
