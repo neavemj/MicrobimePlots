@@ -54,7 +54,7 @@ endosRelAbundFiltSpist <- prune_samples(c("11","49-2","50-2","51-2","52-2","53-2
 
 # now plot the tree
 
-plot_tree(endosRelAbundFiltSpist, label.tips = 'taxa_names', color='abundance', size='abundance')
+plot_tree(endosRelAbundFiltSpist, label.tips = 'taxa_names', color='site', size='abundance')
 
 plot_bar(endosRelAbundFilt) +
   facet_wrap(~site, scales='free')
