@@ -15,7 +15,7 @@ library("vegan")
 library("grid")
 library("directlabels")
 library("knitr")
-opts_knit$set(root.dir = "~/microbiome/subprojects/2.16S_MiSeq/2.data/3.mothur/")
+setwd("./data")
 ```
 
 # Relative abundance of pocillopora damicornis otus bar plot
